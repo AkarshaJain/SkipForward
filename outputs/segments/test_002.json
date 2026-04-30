@@ -1,0 +1,490 @@
+{
+  "video_id": "test_002",
+  "video_filename": "test_002.mp4",
+  "duration_seconds": 1350.502,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 58.1,
+      "duration": 58.1,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 58.1,
+      "end": 87.575,
+      "duration": 29.476,
+      "label": "intro",
+      "confidence": 0.904
+    },
+    {
+      "start": 87.575,
+      "end": 115.0,
+      "duration": 27.425,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 115.0,
+      "end": 216.894,
+      "duration": 101.894,
+      "label": "ad",
+      "confidence": 0.512
+    },
+    {
+      "start": 216.894,
+      "end": 280.276,
+      "duration": 63.381,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 280.276,
+      "end": 324.745,
+      "duration": 44.469,
+      "label": "ad",
+      "confidence": 0.728
+    },
+    {
+      "start": 324.745,
+      "end": 500.0,
+      "duration": 175.255,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 500.0,
+      "end": 516.763,
+      "duration": 16.763,
+      "label": "silence",
+      "confidence": 0.99
+    },
+    {
+      "start": 516.763,
+      "end": 652.0,
+      "duration": 135.237,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 652.0,
+      "end": 674.0,
+      "duration": 22.0,
+      "label": "silence",
+      "confidence": 0.95
+    },
+    {
+      "start": 674.0,
+      "end": 682.884,
+      "duration": 8.884,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 682.884,
+      "end": 700.604,
+      "duration": 17.72,
+      "label": "ad",
+      "confidence": 0.665
+    },
+    {
+      "start": 700.604,
+      "end": 771.993,
+      "duration": 71.389,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 771.993,
+      "end": 785.794,
+      "duration": 13.801,
+      "label": "ad",
+      "confidence": 0.879
+    },
+    {
+      "start": 785.794,
+      "end": 796.187,
+      "duration": 10.393,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 796.187,
+      "end": 931.0,
+      "duration": 134.813,
+      "label": "silence",
+      "confidence": 0.95
+    },
+    {
+      "start": 931.0,
+      "end": 960.0,
+      "duration": 29.0,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 960.0,
+      "end": 1171.705,
+      "duration": 211.705,
+      "label": "silence",
+      "confidence": 0.95
+    },
+    {
+      "start": 1171.705,
+      "end": 1247.524,
+      "duration": 75.819,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 1247.524,
+      "end": 1264.903,
+      "duration": 17.379,
+      "label": "silence",
+      "confidence": 0.95
+    },
+    {
+      "start": 1264.903,
+      "end": 1350.502,
+      "duration": 85.599,
+      "label": "core_content",
+      "confidence": 0.85
+    }
+  ],
+  "skip_recommendations": [
+    {
+      "start": 58.1,
+      "end": 87.575,
+      "label": "intro",
+      "reason": "Detected as intro segment near video start."
+    },
+    {
+      "start": 115.0,
+      "end": 216.894,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 280.276,
+      "end": 324.745,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 500.0,
+      "end": 516.763,
+      "label": "silence",
+      "reason": "Long silence / dead air."
+    },
+    {
+      "start": 652.0,
+      "end": 674.0,
+      "label": "silence",
+      "reason": "Long silence / dead air."
+    },
+    {
+      "start": 682.884,
+      "end": 700.604,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 771.993,
+      "end": 785.794,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 796.187,
+      "end": 931.0,
+      "label": "silence",
+      "reason": "Long silence / dead air."
+    },
+    {
+      "start": 960.0,
+      "end": 1171.705,
+      "label": "silence",
+      "reason": "Long silence / dead air."
+    },
+    {
+      "start": 1247.524,
+      "end": 1264.903,
+      "label": "silence",
+      "reason": "Long silence / dead air."
+    }
+  ],
+  "summary": {
+    "total_segments": 21,
+    "labels": {
+      "core_content": 11,
+      "intro": 1,
+      "ad": 4,
+      "silence": 5
+    },
+    "core_content_seconds": 740.482,
+    "non_content_seconds": 610.02,
+    "non_content_ratio": 0.4517
+  },
+  "timeline_map": [
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 0.0,
+      "end": 58.1
+    },
+    {
+      "label": "intro",
+      "color": "#1565c0",
+      "start": 58.1,
+      "end": 87.575
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 87.575,
+      "end": 115.0
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 115.0,
+      "end": 216.894
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 216.894,
+      "end": 280.276
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 280.276,
+      "end": 324.745
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 324.745,
+      "end": 500.0
+    },
+    {
+      "label": "silence",
+      "color": "#757575",
+      "start": 500.0,
+      "end": 516.763
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 516.763,
+      "end": 652.0
+    },
+    {
+      "label": "silence",
+      "color": "#757575",
+      "start": 652.0,
+      "end": 674.0
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 674.0,
+      "end": 682.884
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 682.884,
+      "end": 700.604
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 700.604,
+      "end": 771.993
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 771.993,
+      "end": 785.794
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 785.794,
+      "end": 796.187
+    },
+    {
+      "label": "silence",
+      "color": "#757575",
+      "start": 796.187,
+      "end": 931.0
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 931.0,
+      "end": 960.0
+    },
+    {
+      "label": "silence",
+      "color": "#757575",
+      "start": 960.0,
+      "end": 1171.705
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 1171.705,
+      "end": 1247.524
+    },
+    {
+      "label": "silence",
+      "color": "#757575",
+      "start": 1247.524,
+      "end": 1264.903
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 1264.903,
+      "end": 1350.502
+    }
+  ],
+  "extra": {
+    "shot_count": 178,
+    "splice_boundaries": [
+      58.1,
+      87.575,
+      145.334,
+      216.894,
+      500.236,
+      516.763,
+      518.126,
+      677.773,
+      771.993,
+      773.015,
+      785.794,
+      796.187,
+      827.537,
+      856.331,
+      857.524,
+      878.14,
+      887.0,
+      913.579,
+      940.67,
+      967.078,
+      1112.754,
+      1122.636,
+      1166.423,
+      1168.468,
+      1247.524,
+      1259.451,
+      1264.903
+    ],
+    "splice_pair_ads": [
+      {
+        "start": 500.0,
+        "end": 517.0,
+        "confidence": 0.99
+      },
+      {
+        "start": 1123.0,
+        "end": 1168.0,
+        "confidence": 0.924
+      },
+      {
+        "start": 58.0,
+        "end": 88.0,
+        "confidence": 0.919
+      },
+      {
+        "start": 772.0,
+        "end": 786.0,
+        "confidence": 0.879
+      },
+      {
+        "start": 1248.0,
+        "end": 1265.0,
+        "confidence": 0.621
+      },
+      {
+        "start": 145.0,
+        "end": 217.0,
+        "confidence": 0.568
+      },
+      {
+        "start": 796.0,
+        "end": 914.0,
+        "confidence": 0.546
+      },
+      {
+        "start": 967.0,
+        "end": 1113.0,
+        "confidence": 0.523
+      }
+    ],
+    "silence_regions": [
+      {
+        "start": 211.0,
+        "end": 216.0
+      },
+      {
+        "start": 337.0,
+        "end": 343.0
+      },
+      {
+        "start": 500.0,
+        "end": 516.0
+      },
+      {
+        "start": 652.0,
+        "end": 674.0
+      },
+      {
+        "start": 826.0,
+        "end": 831.0
+      },
+      {
+        "start": 853.0,
+        "end": 858.0
+      },
+      {
+        "start": 878.0,
+        "end": 886.0
+      },
+      {
+        "start": 915.0,
+        "end": 931.0
+      },
+      {
+        "start": 937.0,
+        "end": 943.0
+      },
+      {
+        "start": 960.0,
+        "end": 968.0
+      },
+      {
+        "start": 980.0,
+        "end": 1014.0
+      },
+      {
+        "start": 1016.0,
+        "end": 1055.0
+      },
+      {
+        "start": 1116.0,
+        "end": 1124.0
+      },
+      {
+        "start": 1249.0,
+        "end": 1262.0
+      }
+    ],
+    "whisper_available": true,
+    "speech_text_excerpt": "10, 9, 8, 7, RS 25 engines, 4, 3, 2, 1, booster ignition and lift off. Artemis 2 now bound for the moon. Humanities next great. Houston Integrity, good home pitch. Bradu, right at pitch. F-5 And the All right. And so when my have huge restrictions that can decrease. oh the integrity guidance converged performance namal sub we think oh see as ready copy after Yeah, integrity, SM priming complete. Yes, I'm running complete. And Houston has you loud and clear on teachers at the Common Line. Three m"
+  }
+}

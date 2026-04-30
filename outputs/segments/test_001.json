@@ -1,0 +1,164 @@
+{
+  "video_id": "test_001",
+  "video_filename": "test_001.mp4",
+  "duration_seconds": 1458.425,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 4.017,
+      "duration": 4.017,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 4.017,
+      "end": 210.207,
+      "duration": 206.19,
+      "label": "intro",
+      "confidence": 0.969
+    },
+    {
+      "start": 210.207,
+      "end": 630.62,
+      "duration": 420.413,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 630.62,
+      "end": 661.749,
+      "duration": 31.129,
+      "label": "ad",
+      "confidence": 0.874
+    },
+    {
+      "start": 661.749,
+      "end": 1093.041,
+      "duration": 431.292,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 1093.041,
+      "end": 1115.635,
+      "duration": 22.594,
+      "label": "ad",
+      "confidence": 0.913
+    },
+    {
+      "start": 1115.635,
+      "end": 1458.425,
+      "duration": 342.791,
+      "label": "core_content",
+      "confidence": 0.85
+    }
+  ],
+  "skip_recommendations": [
+    {
+      "start": 4.017,
+      "end": 210.207,
+      "label": "intro",
+      "reason": "Detected as intro segment near video start."
+    },
+    {
+      "start": 630.62,
+      "end": 661.749,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 1093.041,
+      "end": 1115.635,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    }
+  ],
+  "summary": {
+    "total_segments": 7,
+    "labels": {
+      "core_content": 4,
+      "intro": 1,
+      "ad": 2
+    },
+    "core_content_seconds": 1198.512,
+    "non_content_seconds": 259.913,
+    "non_content_ratio": 0.1782
+  },
+  "timeline_map": [
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 0.0,
+      "end": 4.017
+    },
+    {
+      "label": "intro",
+      "color": "#1565c0",
+      "start": 4.017,
+      "end": 210.207
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 210.207,
+      "end": 630.62
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 630.62,
+      "end": 661.749
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 661.749,
+      "end": 1093.041
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 1093.041,
+      "end": 1115.635
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 1115.635,
+      "end": 1458.425
+    }
+  ],
+  "extra": {
+    "shot_count": 113,
+    "splice_boundaries": [
+      4.017,
+      210.207,
+      630.62,
+      661.749,
+      662.753,
+      1115.635,
+      1453.204,
+      1453.706
+    ],
+    "splice_pair_ads": [
+      {
+        "start": 631.0,
+        "end": 662.0,
+        "confidence": 0.989
+      },
+      {
+        "start": 4.0,
+        "end": 210.0,
+        "confidence": 0.969
+      }
+    ],
+    "silence_regions": [
+      {
+        "start": 209.0,
+        "end": 214.0
+      }
+    ],
+    "whisper_available": true,
+    "speech_text_excerpt": "When you have 21 minutes to speak, 2 million years seems like a really long time, but evolutionarily 2 million years is nothing. And yet in 2 million years, the human brain has nearly tripled in mass, going from the one and a quarter pound brain of our ancestor here, haveless to the almost three-pound meatloaf that everybody here has between their ears. What is it about a big brain that nature was so eager for everyone to have one? Well, it turns out when brains triple in size, they don't just g"
+  }
+}

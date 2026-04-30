@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Project-specific -------------------------------------------------------
+
+# Course-provided input dataset (large MP4s; test_003.mp4 exceeds GitHub's
+# 100 MB per-file limit and the dataset is not ours to redistribute).
+videos_with_ads/
+
+# Cached intermediates (regenerable; ~256 MB of extracted WAVs etc.).
+outputs/intermediate/
+
+# Generated player index (rebuilt by run_player.py from outputs/segments/).
+player/app.json
+
+# Whisper model cache
+*.pt
+.cache/
+
+# Course assignment brief (not ours to redistribute publicly).
+Project_Spring2026.pdf

@@ -1,0 +1,192 @@
+{
+  "video_id": "test_004",
+  "video_filename": "test_004.mp4",
+  "duration_seconds": 1935.928,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 263.986,
+      "duration": 263.986,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 263.986,
+      "end": 283.784,
+      "duration": 19.799,
+      "label": "ad",
+      "confidence": 0.835
+    },
+    {
+      "start": 283.784,
+      "end": 1106.032,
+      "duration": 822.247,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 1106.032,
+      "end": 1142.922,
+      "duration": 36.89,
+      "label": "ad",
+      "confidence": 0.949
+    },
+    {
+      "start": 1142.922,
+      "end": 1164.582,
+      "duration": 21.66,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 1164.582,
+      "end": 1321.112,
+      "duration": 156.53,
+      "label": "ad",
+      "confidence": 0.087
+    },
+    {
+      "start": 1321.112,
+      "end": 1635.0,
+      "duration": 313.888,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 1635.0,
+      "end": 1692.0,
+      "duration": 57.0,
+      "label": "ad",
+      "confidence": 0.85
+    },
+    {
+      "start": 1692.0,
+      "end": 1935.928,
+      "duration": 243.928,
+      "label": "core_content",
+      "confidence": 0.85
+    }
+  ],
+  "skip_recommendations": [
+    {
+      "start": 263.986,
+      "end": 283.784,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 1106.032,
+      "end": 1142.922,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 1164.582,
+      "end": 1321.112,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 1635.0,
+      "end": 1692.0,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    }
+  ],
+  "summary": {
+    "total_segments": 9,
+    "labels": {
+      "core_content": 5,
+      "ad": 4
+    },
+    "core_content_seconds": 1665.709,
+    "non_content_seconds": 270.219,
+    "non_content_ratio": 0.1396
+  },
+  "timeline_map": [
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 0.0,
+      "end": 263.986
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 263.986,
+      "end": 283.784
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 283.784,
+      "end": 1106.032
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 1106.032,
+      "end": 1142.922
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 1142.922,
+      "end": 1164.582
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 1164.582,
+      "end": 1321.112
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 1321.112,
+      "end": 1635.0
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 1635.0,
+      "end": 1692.0
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 1692.0,
+      "end": 1935.928
+    }
+  ],
+  "extra": {
+    "shot_count": 126,
+    "splice_boundaries": [
+      7.107,
+      7.615,
+      1170.844,
+      1321.112,
+      1341.08,
+      1686.292
+    ],
+    "splice_pair_ads": [
+      {
+        "start": 1171.0,
+        "end": 1321.0,
+        "confidence": 0.517
+      }
+    ],
+    "silence_regions": [
+      {
+        "start": 0.0,
+        "end": 6.0
+      },
+      {
+        "start": 1444.0,
+        "end": 1451.0
+      }
+    ],
+    "whisper_available": true,
+    "speech_text_excerpt": "Hi everyone, welcome to another lecture for CS230D Plurning. Today we're going to talk about enhancing large language moral applications and I called this lecture beyond LLN. It has a lot of newer contents. And the idea behind this lecture is, we started to learn about neurons, and then we learned about layers, and then we learned about deep neural networks, and then we learned a little bit about how to structure projects in C3, and now we're going one level beyond into What we need to do, Clike"
+  }
+}

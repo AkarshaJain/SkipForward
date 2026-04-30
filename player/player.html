@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Multimodal Video Segmentation — Player</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #181b22;
+    --panel-2: #1f232c;
+    --text: #e6e8ee;
+    --muted: #9aa3b2;
+    --accent: #4f9dff;
+    --core: #2e7d32;
+    --ad: #c62828;
+    --intro: #1565c0;
+    --outro: #6a1b9a;
+    --silence: #757575;
+    --transition: #ef6c00;
+    --filler: #9e9d24;
+    --recap: #00838f;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  body { padding: 20px; }
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 14px 0;
+    color: var(--text);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+  .sidebar {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 14px;
+    height: fit-content;
+  }
+  .sidebar h2 { font-size: 13px; color: var(--muted); margin: 12px 0 6px 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .sidebar h2:first-child { margin-top: 0; }
+  .video-list { list-style: none; padding: 0; margin: 0; }
+  .video-list li {
+    padding: 8px 10px; border-radius: 6px; cursor: pointer;
+    color: var(--text); font-size: 14px; margin-bottom: 4px;
+    transition: background 0.15s;
+  }
+  .video-list li:hover { background: var(--panel-2); }
+  .video-list li.active { background: var(--accent); color: white; }
+
+  .main {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 16px;
+    min-height: 700px;
+  }
+  .video-wrap {
+    position: relative;
+    background: black;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  video { width: 100%; height: auto; display: block; max-height: 70vh; background: black; }
+
+  /* Timeline */
+  .timeline-block { margin-top: 14px; }
+  .timeline {
+    position: relative;
+    height: 38px;
+    background: var(--panel-2);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+  }
+  .seg {
+    position: absolute; top: 0; bottom: 0;
+    border-right: 1px solid rgba(0,0,0,0.25);
+    transition: opacity 0.15s;
+  }
+  .seg:hover { opacity: 0.85; }
+  .playhead {
+    position: absolute; top: -2px; bottom: -2px;
+    width: 2px; background: white;
+    box-shadow: 0 0 6px rgba(255,255,255,0.7);
+    pointer-events: none;
+    z-index: 5;
+  }
+  .ticks {
+    position: relative;
+    height: 16px;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+  }
+  .tick { position: absolute; transform: translateX(-50%); }
+
+  /* Controls */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-top: 12px;
+  }
+  button {
+    background: var(--panel-2); color: var(--text);
+    border: 1px solid #2c313b; padding: 8px 14px; border-radius: 6px;
+    cursor: pointer; font-size: 13px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  button:hover { background: #2a2f39; border-color: var(--accent); }
+  button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  button.primary:hover { background: #3a89ec; }
+  .toggle {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+    color: var(--muted); cursor: pointer;
+    padding: 6px 10px; border-radius: 6px; background: var(--panel-2);
+  }
+  .toggle input { accent-color: var(--accent); cursor: pointer; }
+  .time-display {
+    margin-left: auto; font-variant-numeric: tabular-nums;
+    color: var(--muted); font-size: 13px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 12px;
+    color: var(--muted);
+  }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-swatch {
+    display: inline-block; width: 12px; height: 12px; border-radius: 2px;
+  }
+
+  /* Segment list */
+  .seg-list {
+    margin-top: 16px;
+    border-top: 1px solid #262a33;
+    padding-top: 14px;
+  }
+  .seg-row {
+    display: grid;
+    grid-template-columns: 24px 90px 90px 1fr 60px 60px;
+    gap: 10px;
+    align-items: center;
+    font-size: 13px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .seg-row:hover { background: var(--panel-2); }
+  .seg-row.active { background: rgba(79,157,255,0.18); }
+  .seg-pill {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; color: white; text-transform: uppercase;
+  }
+  .conf-bar {
+    width: 100%; height: 4px; background: #2a2f39; border-radius: 2px; overflow: hidden;
+  }
+  .conf-bar > div { height: 100%; background: var(--accent); }
+
+  .empty {
+    color: var(--muted); padding: 50px; text-align: center; font-size: 14px;
+  }
+  .summary {
+    display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px;
+    color: var(--muted); font-size: 12px;
+  }
+  .summary b { color: var(--text); font-weight: 600; }
+
+  /* tooltip */
+  .tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(20,22,28,0.95);
+    border: 1px solid #2a2f39;
+    color: white; padding: 6px 10px; border-radius: 4px;
+    font-size: 12px; z-index: 999;
+    white-space: nowrap; display: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Multimodal Video Segmentation — Offline Player</h1>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h2>Videos</h2>
+    <ul id="video-list" class="video-list"></ul>
+    <h2>Open any video</h2>
+    <input type="file" id="local-file" accept="video/*"
+           style="display:none;" />
+    <button type="button" id="btn-pick-file" style="width:100%; margin-bottom:6px;">
+      Choose local file…
+    </button>
+    <input type="text" id="custom-url"
+           placeholder="…or paste a video URL"
+           style="width:100%; padding:6px 8px; border-radius:4px;
+                  border:1px solid #2c313b; background:var(--panel-2);
+                  color:var(--text); font-size:12px;" />
+    <button type="button" id="btn-load-url" style="width:100%; margin-top:6px;">
+      Load URL
+    </button>
+    <h2>Legend</h2>
+    <div id="legend" class="legend"></div>
+    <h2>How to use</h2>
+    <div style="font-size: 12px; color: var(--muted); line-height: 1.5;">
+      Click any segment in the timeline to jump there.
+      Use <b>Auto-skip non-content</b> to skip ads/intros/silences.
+      Use <b>Play core only</b> to chain core segments back-to-back.
+      <br><br>
+      For new videos, run <code>python run_pipeline.py --video PATH</code>
+      to generate segmentation, then refresh.
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div id="empty" class="empty">Loading video index…</div>
+
+    <div id="player-block" style="display:none;">
+      <div class="video-wrap">
+        <video id="video" controls preload="metadata"></video>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline" id="timeline">
+          <div class="playhead" id="playhead"></div>
+        </div>
+        <div class="ticks" id="ticks"></div>
+      </div>
+
+      <div class="controls">
+        <button type="button" id="btn-prev">⏮ Prev seg</button>
+        <button type="button" id="btn-next">⏭ Next seg</button>
+        <button type="button" id="btn-skip-cur">⏩ Skip current</button>
+        <button type="button" class="primary" id="btn-play-core">▶ Play core only</button>
+        <label class="toggle">
+          <input type="checkbox" id="auto-skip" />
+          Auto-skip non-content
+        </label>
+        <span class="time-display" id="time-display">00:00 / 00:00</span>
+      </div>
+
+      <div class="summary" id="summary"></div>
+      <div class="seg-list" id="seg-list"></div>
+    </div>
+  </main>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+"use strict";
+// ============================================================
+// Player logic — defensive rewrite
+// All functions defined before any DOM wiring; init() runs at the
+// very bottom of the script, after the DOM is fully parsed.
+// ============================================================
+
+const $ = id => document.getElementById(id);
+
+function getCss(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function fmt(t){
+  if (!isFinite(t) || t < 0) t = 0;
+  const h = Math.floor(t/3600);
+  const m = Math.floor((t%3600)/60);
+  const s = Math.floor(t%60);
+  return (h>0 ? String(h).padStart(2,"0")+":" : "") + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+
+// State
+let COLORS = {};
+let app = null;
+let current = null;
+let coreOnlyMode = false;
+let activeSegmentIdx = -1;
+let isProgrammaticSeek = false;     // suppress auto-skip during user actions
+
+// ------------------------------------------------------------
+// Seeking primitives
+// ------------------------------------------------------------
+function seekTo(seconds){
+  const v = $("video");
+  if (!v) return;
+  const dur = (current && current.duration_seconds)
+              || (isFinite(v.duration) ? v.duration : 0);
+  let t = Math.max(0, seconds);
+  if (dur > 0) t = Math.min(t, Math.max(0, dur - 0.05));
+  isProgrammaticSeek = true;
+  try {
+    v.currentTime = t;
+  } catch (e) {
+    console.warn("seekTo failed:", e);
+  }
+  // release the suppression on the next tick so auto-skip resumes
+  setTimeout(() => { isProgrammaticSeek = false; }, 50);
+}
+
+function findSegmentIdx(t){
+  if (!current || !current.timeline_map) return -1;
+  for (let i = 0; i < current.timeline_map.length; i++){
+    const s = current.timeline_map[i];
+    if (t >= s.start && t < s.end) return i;
+  }
+  if (t >= current.duration_seconds) return current.timeline_map.length - 1;
+  return -1;
+}
+
+// ------------------------------------------------------------
+// Index loading
+// ------------------------------------------------------------
+async function loadIndex(){
+  try {
+    const r = await fetch("app.json", { cache: "no-store" });
+    if (!r.ok) throw new Error("app.json HTTP " + r.status);
+    app = await r.json();
+  } catch (e){
+    $("empty").textContent =
+      "Could not load player/app.json. Run `python run_player.py` first.";
+    console.error("[player] loadIndex failed:", e);
+    return;
+  }
+
+  const list = $("video-list");
+  list.innerHTML = "";
+  app.videos.forEach((v, i) => {
+    const li = document.createElement("li");
+    li.textContent = v.video_id;
+    li.dataset.idx = String(i);
+    li.addEventListener("click", () => selectVideo(i));
+    list.appendChild(li);
+  });
+  drawLegend();
+  if (app.videos.length){
+    selectVideo(0);
+  } else {
+    $("empty").textContent =
+      "No videos found. Run `python run_pipeline.py` to generate segmentation outputs.";
+  }
+}
+
+function drawLegend(){
+  const legend = $("legend");
+  legend.innerHTML = "";
+  Object.entries(COLORS).forEach(([k, c]) => {
+    const sp = document.createElement("span");
+    sp.className = "legend-item";
+    sp.innerHTML = `<span class="legend-swatch" style="background:${c}"></span>${k}`;
+    legend.appendChild(sp);
+  });
+}
+
+function selectVideo(idx){
+  document.querySelectorAll("#video-list li").forEach((li, i) =>
+    li.classList.toggle("active", i === idx));
+  current = app.videos[idx];
+  coreOnlyMode = false;
+  const playCoreBtn = $("btn-play-core");
+  if (playCoreBtn) playCoreBtn.textContent = "▶ Play core only";
+  $("empty").style.display = "none";
+  $("player-block").style.display = "block";
+  const v = $("video");
+  v.src = current.video_url;
+  v.load();
+  drawTimeline();
+  drawSegList();
+  drawSummary();
+  activeSegmentIdx = -1;
+}
+
+// Build a "fake" current with a single core_content segment so the
+// timeline renders as one big green bar (until the user runs the pipeline).
+function loadAdHocVideo(url, label){
+  // A short video may have unknown duration until metadata loads — start
+  // with a placeholder duration of 1 hour and refresh when known.
+  const placeholderDur = 3600;
+  current = {
+    video_id: label || "(custom)",
+    video_filename: label || url,
+    video_url: url,
+    duration_seconds: placeholderDur,
+    segments: [{
+      start: 0, end: placeholderDur, duration: placeholderDur,
+      label: "core_content", confidence: 0,
+    }],
+    timeline_map: [{
+      label: "core_content", color: COLORS.core_content,
+      start: 0, end: placeholderDur,
+    }],
+    skip_recommendations: [],
+    summary: {
+      total_segments: 1, labels: { core_content: 1 },
+      core_content_seconds: placeholderDur,
+      non_content_seconds: 0, non_content_ratio: 0,
+    },
+  };
+  coreOnlyMode = false;
+  const playCoreBtn = $("btn-play-core");
+  if (playCoreBtn) playCoreBtn.textContent = "▶ Play core only";
+  $("empty").style.display = "none";
+  $("player-block").style.display = "block";
+  document.querySelectorAll("#video-list li").forEach(li =>
+    li.classList.remove("active"));
+
+  const v = $("video");
+  v.src = url;
+  v.load();
+
+  // Once the real duration is known, rebuild the timeline.
+  v.addEventListener("loadedmetadata", () => {
+    if (!isFinite(v.duration) || v.duration <= 0) return;
+    current.duration_seconds = v.duration;
+    current.timeline_map[0].end = v.duration;
+    current.segments[0].end = v.duration;
+    current.segments[0].duration = v.duration;
+    current.summary.core_content_seconds = v.duration;
+    drawTimeline();
+    drawSegList();
+    drawSummary();
+  }, { once: true });
+
+  drawTimeline();
+  drawSegList();
+  drawSummary();
+  activeSegmentIdx = -1;
+}
+
+function drawTimeline(){
+  const tl = $("timeline");
+  Array.from(tl.querySelectorAll(".seg")).forEach(n => n.remove());
+  const dur = current.duration_seconds;
+  current.timeline_map.forEach((s, i) => {
+    const el = document.createElement("div");
+    el.className = "seg";
+    el.style.left = (100 * s.start / dur) + "%";
+    el.style.width = (100 * Math.max(s.end - s.start, 0) / dur) + "%";
+    el.style.background = COLORS[s.label] || "#888";
+    el.dataset.idx = String(i);
+    el.title = `${s.label}  ${fmt(s.start)} – ${fmt(s.end)}`;
+
+    el.addEventListener("mousemove", (e) => {
+      const tip = $("tooltip");
+      tip.style.display = "block";
+      tip.style.left = (e.clientX + 12) + "px";
+      tip.style.top  = (e.clientY + 12) + "px";
+      tip.innerHTML = `<b>${s.label}</b><br>${fmt(s.start)} – ${fmt(s.end)} (${fmt(s.end - s.start)})`;
+    });
+    el.addEventListener("mouseleave", () => $("tooltip").style.display = "none");
+    tl.appendChild(el);
+  });
+
+  const ticks = $("ticks");
+  ticks.innerHTML = "";
+  const stepSec = dur > 1800 ? 300 : (dur > 600 ? 120 : 60);
+  for (let t = 0; t <= dur; t += stepSec){
+    const tick = document.createElement("span");
+    tick.className = "tick";
+    tick.style.left = (100 * t / dur) + "%";
+    tick.textContent = fmt(t);
+    ticks.appendChild(tick);
+  }
+}
+
+function drawSegList(){
+  const list = $("seg-list");
+  list.innerHTML = `
+    <div class="seg-row" style="font-weight:600;color:var(--muted);">
+      <div></div><div>start</div><div>end</div><div>label</div><div>conf</div><div>dur</div>
+    </div>`;
+  current.timeline_map.forEach((s, i) => {
+    const seg = current.segments[i] || s;
+    const row = document.createElement("div");
+    row.className = "seg-row";
+    row.dataset.idx = String(i);
+    const dur = s.end - s.start;
+    row.innerHTML = `
+      <div style="text-align:right;color:var(--muted);">${i+1}</div>
+      <div>${fmt(s.start)}</div>
+      <div>${fmt(s.end)}</div>
+      <div><span class="seg-pill" style="background:${COLORS[s.label]||"#888"}">${s.label}</span></div>
+      <div><div class="conf-bar"><div style="width:${Math.round((seg.confidence||0)*100)}%"></div></div></div>
+      <div style="color:var(--muted);">${fmt(dur)}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function drawSummary(){
+  const s = current.summary;
+  $("summary").innerHTML = `
+    <span><b>${s.total_segments}</b> segments</span>
+    <span><b>${fmt(s.core_content_seconds)}</b> core</span>
+    <span><b>${fmt(s.non_content_seconds)}</b> non-content (<b>${(s.non_content_ratio*100).toFixed(1)}%</b>)</span>
+    <span>Skip recommendations: <b>${current.skip_recommendations.length}</b></span>
+  `;
+}
+
+// ------------------------------------------------------------
+// Playback handlers
+// ------------------------------------------------------------
+function highlightActive(idx){
+  document.querySelectorAll(".seg-row").forEach(r => {
+    r.classList.toggle("active", String(r.dataset.idx) === String(idx));
+  });
+}
+
+function onTimeUpdate(){
+  if (!current) return;
+  const v = $("video");
+  const t = v.currentTime;
+  const dur = current.duration_seconds || v.duration || 0;
+  $("time-display").textContent = `${fmt(t)} / ${fmt(dur)}`;
+  $("playhead").style.left = (100 * t / Math.max(dur,1)) + "%";
+
+  const idx = findSegmentIdx(t);
+  if (idx !== activeSegmentIdx){
+    activeSegmentIdx = idx;
+    highlightActive(idx);
+  }
+
+  if (isProgrammaticSeek) return;
+
+  if ($("auto-skip").checked || coreOnlyMode){
+    if (idx >= 0 && current.timeline_map[idx].label !== "core_content"){
+      const seg = current.timeline_map[idx];
+      seekTo(seg.end + 0.05);
+    }
+  }
+}
+
+function jumpToNextSegment(){
+  if (!current) return;
+  const v = $("video");
+  const i = findSegmentIdx(v.currentTime);
+  const next = (i < 0) ? 0 : i + 1;
+  if (next >= current.timeline_map.length) return;
+  seekTo(current.timeline_map[next].start + 0.05);
+  if (v.paused) v.play();
+}
+
+function jumpToPrevSegment(){
+  if (!current) return;
+  const v = $("video");
+  const i = findSegmentIdx(v.currentTime);
+  if (i <= 0) { seekTo(0); return; }
+  seekTo(current.timeline_map[i-1].start + 0.05);
+  if (v.paused) v.play();
+}
+
+function skipCurrent(){
+  if (!current) return;
+  const v = $("video");
+  const i = findSegmentIdx(v.currentTime);
+  if (i < 0) return;
+  seekTo(current.timeline_map[i].end + 0.05);
+  if (v.paused) v.play();
+}
+
+function togglePlayCore(){
+  if (!current) return;
+  coreOnlyMode = !coreOnlyMode;
+  $("btn-play-core").textContent =
+    coreOnlyMode ? "■ Stop core-only" : "▶ Play core only";
+  if (coreOnlyMode){
+    const v = $("video");
+    const i = findSegmentIdx(v.currentTime);
+    if (i >= 0 && current.timeline_map[i].label !== "core_content"){
+      seekTo(current.timeline_map[i].end + 0.05);
+    }
+    v.play();
+  }
+}
+
+// ------------------------------------------------------------
+// Initialisation
+// ------------------------------------------------------------
+function attachClick(id, fn){
+  const el = $(id);
+  if (!el){
+    console.warn("[player] missing element:", id);
+    return;
+  }
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try { fn(); } catch (err) { console.error("[player]", id, err); }
+    el.blur();
+  });
+}
+
+function init(){
+  COLORS = {
+    core_content: getCss("--core")  || "#2e7d32",
+    ad:           getCss("--ad")    || "#c62828",
+    intro:        getCss("--intro") || "#1565c0",
+    outro:        getCss("--outro") || "#6a1b9a",
+    silence:      getCss("--silence")    || "#757575",
+    transition:   getCss("--transition") || "#ef6c00",
+    filler:       getCss("--filler")     || "#9e9d24",
+    recap:        getCss("--recap")      || "#00838f",
+  };
+
+  // Buttons (use addEventListener + preventDefault for full safety)
+  attachClick("btn-prev",      jumpToPrevSegment);
+  attachClick("btn-next",      jumpToNextSegment);
+  attachClick("btn-skip-cur",  skipCurrent);
+  attachClick("btn-play-core", togglePlayCore);
+
+  // Load any local video file via the file picker (no upload — uses
+  // an in-memory blob: URL so the browser plays it directly).
+  const pickBtn = $("btn-pick-file");
+  const fileInput = $("local-file");
+  if (pickBtn && fileInput){
+    pickBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", () => {
+      const f = fileInput.files && fileInput.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      loadAdHocVideo(url, f.name);
+    });
+  }
+
+  // Load any video URL (e.g. a link to an mp4 served by another host).
+  attachClick("btn-load-url", () => {
+    const inp = $("custom-url");
+    const url = inp && inp.value && inp.value.trim();
+    if (!url) return;
+    loadAdHocVideo(url, url.split("/").pop() || url);
+  });
+  const urlInput = $("custom-url");
+  if (urlInput){
+    urlInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter"){
+        e.preventDefault();
+        const url = urlInput.value && urlInput.value.trim();
+        if (url) loadAdHocVideo(url, url.split("/").pop() || url);
+      }
+    });
+  }
+
+  // Video time updates
+  const vid = $("video");
+  if (vid) vid.addEventListener("timeupdate", onTimeUpdate);
+
+  // Click-to-seek on the timeline. Always scrub to the exact click
+  // position (segment-start jumping is available via the segment list +
+  // prev/next buttons, so timeline clicks should be a precise scrub).
+  const tl = $("timeline");
+  if (tl){
+    tl.addEventListener("click", (e) => {
+      if (!current) return;
+      const rect = tl.getBoundingClientRect();
+      let f = (e.clientX - rect.left) / rect.width;
+      f = Math.max(0, Math.min(1, f));
+      seekTo(f * current.duration_seconds);
+      if (vid && vid.paused) vid.play();
+    });
+  }
+
+  // Click on a row in the segment list to seek to that segment
+  const segListEl = $("seg-list");
+  if (segListEl){
+    segListEl.addEventListener("click", (e) => {
+      const row = e.target.closest(".seg-row");
+      if (!row || row.dataset.idx === undefined) return;
+      const i = parseInt(row.dataset.idx, 10);
+      if (isNaN(i) || !current || !current.timeline_map[i]) return;
+      seekTo(current.timeline_map[i].start + 0.05);
+      if (vid && vid.paused) vid.play();
+    });
+  }
+
+  // Keyboard shortcuts (don't intercept while typing in form fields)
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (e.key === "ArrowRight" && e.shiftKey){
+      e.preventDefault(); jumpToNextSegment();
+    } else if (e.key === "ArrowLeft" && e.shiftKey){
+      e.preventDefault(); jumpToPrevSegment();
+    } else if (e.key === " " && tag !== "BUTTON"){
+      e.preventDefault();
+      const v = $("video");
+      if (v) (v.paused ? v.play() : v.pause());
+    }
+  });
+
+  loadIndex();
+  console.log("[player] initialised");
+}
+
+// Run init() now if DOM is already ready, else wait for DOMContentLoaded.
+if (document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>

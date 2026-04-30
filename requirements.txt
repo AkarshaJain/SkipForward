@@ -1,0 +1,21 @@
+# Core
+numpy>=1.24,<2.0
+scipy>=1.10
+opencv-python>=4.8
+
+# Audio
+librosa==0.10.2
+soundfile==0.12.1
+
+# FFmpeg (bundled binary, no system install needed)
+imageio-ffmpeg==0.5.1
+
+# Utilities
+tqdm>=4.65
+matplotlib>=3.7
+
+# OPTIONAL: speech-to-text (free, MIT-licensed, runs offline once model is cached)
+# Install with: pip install -U openai-whisper
+# The pipeline auto-detects Whisper and falls back to audio-only speech heuristics
+# if Whisper is not installed or the model cannot be loaded.
+# openai-whisper>=20231117
