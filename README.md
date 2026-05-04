@@ -135,11 +135,19 @@ python run_pipeline.py --only test_001
 #    or skip Whisper for faster runs:
 python run_pipeline.py --no-whisper
 
+#    or process ANY video file from anywhere on disk
+#    (it gets copied into videos_with_ads/ so the player can serve it):
+python run_pipeline.py --video "D:/somewhere/my_lecture.mp4"
+python run_pipeline.py --video clip.mkv --id my_clip   # custom video_id
+
 # 3. Re-evaluate against ground truth without re-running the pipeline:
 python run_evaluation.py
 
 # 4. Build the player index and open the offline player in your browser:
 python run_player.py
+
+# 5. Run the synthetic-input unit tests (a few seconds, no dataset needed):
+python -m pytest tests/ -v
 ```
 
 The pipeline writes to:
@@ -235,15 +243,28 @@ README.md
 }
 ```
 
-The label taxonomy is the one suggested in the project brief:
+The label taxonomy is the one suggested in the project brief plus an
+explicit `holding_screen` sub-type:
 `core_content`, `ad`, `intro`, `outro`, `silence`, `transition`,
-`filler`, `recap`. Labels are assigned by the segmenter as follows:
+`holding_screen`, `filler`, `recap`. Labels are assigned by the segmenter
+as follows:
 
-* `silence` — sustained low-RMS regions (≥ 8 s, adaptive threshold)
-* `intro`   — ad-like region in the first 60 s of the video
-* `outro`   — ad-like region in the last 60 s
-* `ad`      — every other detected non-content region
-* `core_content` — everything else
+* `silence`        — sustained low-RMS regions (≥ 8 s, adaptive threshold)
+* `intro`          — ad-like region in the first 60 s of the video
+* `outro`          — ad-like region in the last 60 s
+* `transition`     — short (2–12 s) black + silent bridge between scenes
+                     (re-classified after the initial mask)
+* `holding_screen` — long (≥ 15 s) static visual + silent + no-speech
+                     region (e.g. "starting soon" / "be right back" cards)
+* `ad`             — every other detected non-content region
+* `core_content`   — everything else
+
+`transition` and `holding_screen` are the *sub-types*: the segmenter
+first finds non-content regions via the multimodal score, then a
+**reclassifier** in `pipeline/segmenter.py:_reclassify_subtypes` looks at
+each region's per-second feature signature (black-frame ratio, silence
+ratio, motion z-score, speech density) and may upgrade the generic label
+to a more specific one.
 
 ---
 
@@ -255,7 +276,9 @@ displays:
 
 * **Coloured timeline strip** below the video, one band per segment
   (red = ad, blue = intro, purple = outro, grey = silence,
-  green = core content). Hover for tooltips, click to seek.
+  orange = transition, brown = holding_screen,
+  green = core content). Hover for tooltips, click anywhere on the
+  strip to scrub the playhead to that exact time (no snapping).
 * **Tick marks** every minute (or 5 minutes for long videos).
 * **Segment table** to the right of the strip, listing every segment
   with start / end / label / confidence / duration. Click a row to jump.
@@ -264,13 +287,31 @@ displays:
   - `⏩ Skip current` — skip the segment currently playing
   - `▶ Play core only` — chain core-content segments back-to-back
   - **Auto-skip non-content** toggle — automatically jump over any
-    non-`core_content` segment as the playhead enters it
+    non-`core_content` segment as the playhead enters it. The player
+    uses an internal `isProgrammaticSeek` flag so auto-skip never fights
+    a user click during the same animation frame.
 * **Keyboard shortcuts:** `Shift+→` / `Shift+←` for next/prev segment,
   `Space` for play/pause.
 * **Summary line** below the timeline: total segments, core-content
   duration, non-content duration + ratio, skip recommendations count.
 
-The player is launched via:
+### 4.1 Playing *any* video without running the pipeline
+
+The player has two entry points for ad-hoc playback that don't require
+running `run_pipeline.py` first:
+
+* **"Choose local file…" button** in the sidebar opens the OS file picker
+  and plays the selected file directly via `URL.createObjectURL` (no
+  upload, no copy — the browser reads the file in-place from your disk).
+* **"Paste a video URL"** input below the picker accepts any
+  HTTPS-served video URL and plays it via the native `<video>` element.
+
+Both modes show the video in the same player chrome with all keyboard
+shortcuts and the auto-skip toggle still functional (the timeline strip
+and segment table are simply empty for ad-hoc videos because they have
+no segmentation metadata).
+
+### 4.2 Launching the player
 
 ```bash
 python run_player.py                # default: serves on http://127.0.0.1:8000
@@ -280,13 +321,21 @@ python run_player.py --build-only   # only write app.json, don't serve
 ```
 
 This writes `player/app.json` (combining all per-video metadata),
-starts a tiny built-in static-file HTTP server in the project root,
-and opens `player/player.html` in your default browser. The server is
-needed because browsers block `fetch()` from `file://` URLs;
-`run_player.py` uses Python's stdlib `http.server` (no extra deps) and
-shuts down cleanly on `Ctrl+C`. Because video playback is delegated to
-the native `<video>` element, **audio is synchronised with video
-automatically** — no custom AV-sync code required.
+starts a built-in static-file HTTP server in the project root, and opens
+`player/player.html` in your default browser. The server:
+
+* Is needed because browsers block `fetch()` from `file://` URLs.
+* Implements **HTTP byte-range requests** (`206 Partial Content` /
+  `416 Range Not Satisfiable`), `Accept-Ranges: bytes`, correct MIME
+  types, and `Cache-Control: no-store`. This is what makes
+  scrubbing on long `<video>` elements actually work — without it,
+  Chrome silently fails to seek mid-stream on big files.
+* Uses Python's stdlib `http.server` (no extra deps) and shuts down
+  cleanly on `Ctrl+C`.
+
+Because video playback is delegated to the native `<video>` element,
+**audio is synchronised with video automatically** — no custom AV-sync
+code required.
 
 ---
 
@@ -336,6 +385,24 @@ Inspect those images for a qualitative read on each video.
 
 ---
 
+## 5.2 Synthetic-input unit tests
+
+Beyond per-video evaluation against ground truth, the project ships a
+`tests/` folder with 36 synthetic-input unit tests that prove each
+feature extractor and the segmenter respond correctly to known stimuli
+(silent WAV, pure sine, white noise, repeated frames, hand-crafted ad
+regions, schema validity, etc.). Run them with:
+
+```bash
+python -m pytest tests/ -v
+```
+
+The whole suite runs in a few seconds and uses **no** dataset files,
+so it works on any machine without `videos_with_ads/` present. See
+`tests/README.md` for what each test proves.
+
+---
+
 ## 6. Design choices & trade-offs
 
 * **Sample at 1 Hz, not native fps.** A 24-minute video is ~1500
@@ -348,6 +415,13 @@ Inspect those images for a qualitative read on each video.
   to differ from the candidate region by ≥ 1 z-unit, with a strong
   combined-score floor. This avoids false positives on internal scene
   changes (which look superficially like splices).
+* **Multi-modality consensus filter.** A second only stays in the ad
+  mask if at least **2 of 4 modality groups** (visual / audio / speech /
+  cross-modal) cross their voting z-threshold. Tuned in
+  `pipeline/config.py:MIN_MODALITY_CONSENSUS`. This is the dial that
+  trades recall for precision: setting it to 1 reverts to the loose
+  pre-fix behaviour, setting it to 3 produces ultra-clean output but
+  drops recall on ads that are only audio-visual without speech.
 * **Whisper as a quality oracle, not just a transcriber.** Music ads
   rarely contain "subscribe" / "sponsor" / "buy now" — but Whisper's
   `no_speech_prob` and `compression_ratio` reliably spike on music

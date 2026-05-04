@@ -10,7 +10,7 @@ Process a single video already in the dataset::
 
     python run_pipeline.py --only test_001
 
-Process ANY video file (anywhere on disk) — it will be copied into
+Process ANY video file (anywhere on disk) -- it will be copied into
 ``videos_with_ads/`` so the player can serve it::
 
     python run_pipeline.py --video "D:/somewhere/my_lecture.mp4"
@@ -28,9 +28,21 @@ Force re-extraction of audio (ignore cache)::
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import sys
 from pathlib import Path
+
+# Force UTF-8 stdout/stderr so the script does not crash on Windows when
+# printing non-ASCII characters (the default cp1252 console codec cannot
+# encode common arrows / em-dashes / accented characters).
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 from pipeline import config
 from pipeline.pipeline import run_all, run_video
@@ -53,7 +65,7 @@ def _import_external_video(src: Path, video_id: str | None = None) -> str:
             print(f"NOTE: {dest.name} already exists in videos_with_ads/, "
                   "reusing it (delete first if you want to re-import).")
         else:
-            print(f"Copying {src} → {dest}")
+            print(f"Copying {src} -> {dest}")
             shutil.copy2(src, dest)
     return vid
 

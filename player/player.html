@@ -18,6 +18,7 @@
     --silence: #757575;
     --transition: #ef6c00;
     --filler: #9e9d24;
+    --holding_screen: #5d4037;
     --recap: #00838f;
   }
   * { box-sizing: border-box; }
@@ -601,14 +602,15 @@ function attachClick(id, fn){
 
 function init(){
   COLORS = {
-    core_content: getCss("--core")  || "#2e7d32",
-    ad:           getCss("--ad")    || "#c62828",
-    intro:        getCss("--intro") || "#1565c0",
-    outro:        getCss("--outro") || "#6a1b9a",
-    silence:      getCss("--silence")    || "#757575",
-    transition:   getCss("--transition") || "#ef6c00",
-    filler:       getCss("--filler")     || "#9e9d24",
-    recap:        getCss("--recap")      || "#00838f",
+    core_content:   getCss("--core")           || "#2e7d32",
+    ad:             getCss("--ad")             || "#c62828",
+    intro:          getCss("--intro")          || "#1565c0",
+    outro:          getCss("--outro")          || "#6a1b9a",
+    silence:        getCss("--silence")        || "#757575",
+    transition:     getCss("--transition")     || "#ef6c00",
+    filler:         getCss("--filler")         || "#9e9d24",
+    holding_screen: getCss("--holding_screen") || "#5d4037",
+    recap:          getCss("--recap")          || "#00838f",
   };
 
   // Buttons (use addEventListener + preventDefault for full safety)

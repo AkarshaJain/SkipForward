@@ -5,52 +5,45 @@
   "segments": [
     {
       "start": 0.0,
-      "end": 199.824,
-      "duration": 199.824,
-      "label": "silence",
-      "confidence": 0.95
-    },
-    {
-      "start": 199.824,
-      "end": 424.0,
-      "duration": 224.176,
+      "end": 27.03,
+      "duration": 27.03,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 424.0,
-      "end": 444.699,
-      "duration": 20.699,
+      "start": 27.03,
+      "end": 76.886,
+      "duration": 49.856,
+      "label": "intro",
+      "confidence": 0.951
+    },
+    {
+      "start": 76.886,
+      "end": 151.37,
+      "duration": 74.484,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 151.37,
+      "end": 192.616,
+      "duration": 41.246,
       "label": "ad",
-      "confidence": 0.785
+      "confidence": 0.829
     },
     {
-      "start": 444.699,
-      "end": 487.147,
-      "duration": 42.448,
+      "start": 192.616,
+      "end": 687.571,
+      "duration": 494.955,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 487.147,
-      "end": 500.762,
-      "duration": 13.615,
-      "label": "ad",
-      "confidence": 0.976
-    },
-    {
-      "start": 500.762,
-      "end": 677.76,
-      "duration": 176.999,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 677.76,
+      "start": 687.571,
       "end": 706.393,
-      "duration": 28.632,
+      "duration": 18.821,
       "label": "ad",
-      "confidence": 0.626
+      "confidence": 0.728
     },
     {
       "start": 706.393,
@@ -68,68 +61,41 @@
     },
     {
       "start": 1023.548,
-      "end": 1062.592,
-      "duration": 39.044,
+      "end": 1061.391,
+      "duration": 37.842,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 1062.592,
-      "end": 1083.616,
-      "duration": 21.024,
+      "start": 1061.391,
+      "end": 1086.018,
+      "duration": 24.628,
       "label": "ad",
-      "confidence": 0.777
+      "confidence": 0.878
     },
     {
-      "start": 1083.616,
-      "end": 1316.878,
-      "duration": 233.262,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 1316.878,
-      "end": 1354.32,
-      "duration": 37.442,
-      "label": "ad",
-      "confidence": 0.651
-    },
-    {
-      "start": 1354.32,
-      "end": 1411.0,
-      "duration": 56.68,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 1411.0,
+      "start": 1086.018,
       "end": 1419.673,
-      "duration": 8.673,
-      "label": "silence",
-      "confidence": 0.95
+      "duration": 333.654,
+      "label": "core_content",
+      "confidence": 0.85
     }
   ],
   "skip_recommendations": [
     {
-      "start": 0.0,
-      "end": 199.824,
-      "label": "silence",
-      "reason": "Long silence / dead air."
+      "start": 27.03,
+      "end": 76.886,
+      "label": "intro",
+      "reason": "Detected as intro segment near video start."
     },
     {
-      "start": 424.0,
-      "end": 444.699,
+      "start": 151.37,
+      "end": 192.616,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
-      "start": 487.147,
-      "end": 500.762,
-      "label": "ad",
-      "reason": "Detected as advertisement (visual + audio + speech cues)."
-    },
-    {
-      "start": 677.76,
+      "start": 687.571,
       "end": 706.393,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
@@ -141,76 +107,59 @@
       "reason": "Long silence / dead air."
     },
     {
-      "start": 1062.592,
-      "end": 1083.616,
+      "start": 1061.391,
+      "end": 1086.018,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
-    },
-    {
-      "start": 1316.878,
-      "end": 1354.32,
-      "label": "ad",
-      "reason": "Detected as advertisement (visual + audio + speech cues)."
-    },
-    {
-      "start": 1411.0,
-      "end": 1419.673,
-      "label": "silence",
-      "reason": "Long silence / dead air."
     }
   ],
   "summary": {
-    "total_segments": 15,
+    "total_segments": 11,
     "labels": {
-      "silence": 3,
-      "core_content": 7,
-      "ad": 5
+      "core_content": 6,
+      "intro": 1,
+      "ad": 3,
+      "silence": 1
     },
-    "core_content_seconds": 1007.672,
-    "non_content_seconds": 412.001,
-    "non_content_ratio": 0.2902
+    "core_content_seconds": 1203.03,
+    "non_content_seconds": 216.643,
+    "non_content_ratio": 0.1526
   },
   "timeline_map": [
     {
-      "label": "silence",
-      "color": "#757575",
+      "label": "core_content",
+      "color": "#2e7d32",
       "start": 0.0,
-      "end": 199.824
+      "end": 27.03
+    },
+    {
+      "label": "intro",
+      "color": "#1565c0",
+      "start": 27.03,
+      "end": 76.886
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 199.824,
-      "end": 424.0
+      "start": 76.886,
+      "end": 151.37
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 424.0,
-      "end": 444.699
+      "start": 151.37,
+      "end": 192.616
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 444.699,
-      "end": 487.147
+      "start": 192.616,
+      "end": 687.571
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 487.147,
-      "end": 500.762
-    },
-    {
-      "label": "core_content",
-      "color": "#2e7d32",
-      "start": 500.762,
-      "end": 677.76
-    },
-    {
-      "label": "ad",
-      "color": "#c62828",
-      "start": 677.76,
+      "start": 687.571,
       "end": 706.393
     },
     {
@@ -229,36 +178,18 @@
       "label": "core_content",
       "color": "#2e7d32",
       "start": 1023.548,
-      "end": 1062.592
+      "end": 1061.391
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 1062.592,
-      "end": 1083.616
+      "start": 1061.391,
+      "end": 1086.018
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 1083.616,
-      "end": 1316.878
-    },
-    {
-      "label": "ad",
-      "color": "#c62828",
-      "start": 1316.878,
-      "end": 1354.32
-    },
-    {
-      "label": "core_content",
-      "color": "#2e7d32",
-      "start": 1354.32,
-      "end": 1411.0
-    },
-    {
-      "label": "silence",
-      "color": "#757575",
-      "start": 1411.0,
+      "start": 1086.018,
       "end": 1419.673
     }
   ],
@@ -269,13 +200,11 @@
       76.886,
       79.289,
       82.292,
-      168.589,
-      169.791,
-      198.022,
       438.692,
       444.699,
       447.702,
       448.503,
+      483.943,
       487.147,
       490.55,
       500.762,
@@ -292,19 +221,19 @@
     ],
     "splice_pair_ads": [
       {
-        "start": 27.0,
-        "end": 169.0,
-        "confidence": 0.987
-      },
-      {
         "start": 487.0,
         "end": 501.0,
-        "confidence": 0.976
+        "confidence": 0.99
+      },
+      {
+        "start": 27.0,
+        "end": 77.0,
+        "confidence": 0.951
       },
       {
         "start": 941.0,
         "end": 1024.0,
-        "confidence": 0.78
+        "confidence": 0.794
       },
       {
         "start": 1317.0,

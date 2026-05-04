@@ -107,7 +107,7 @@ def run_video(item: VideoItem | str,
     # 4. Speech (Whisper) — optional
     if use_whisper:
         log.info("[4/6] transcribing speech with Whisper...")
-        speech = transcribe(audio_wav, num_seconds=num_seconds(meta))
+        speech = transcribe(audio_wav, num_seconds=num_seconds(meta), cache=cache)
         log.info("      whisper available=%s, %d segments, %d ad keyword hits",
                  speech.available, len(speech.segments),
                  int(np.sum(speech.ad_keyword_score > 0)))
@@ -154,7 +154,7 @@ def run_video(item: VideoItem | str,
         splice_pairs=splice_pairs,
     )
     final_segments = finalize(raw_segments)
-    log.info("      → %d final segments", len(final_segments))
+    log.info("      -> %d final segments", len(final_segments))
 
     # 6. Metadata + timeline
     log.info("[6/6] writing outputs...")

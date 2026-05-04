@@ -45,13 +45,14 @@ from .segmenter import Segment
 
 
 _REASONS = {
-    config.LABEL_AD:      "Detected as advertisement (visual + audio + speech cues).",
-    config.LABEL_INTRO:   "Detected as intro segment near video start.",
-    config.LABEL_OUTRO:   "Detected as outro segment near video end.",
-    config.LABEL_SILENCE: "Long silence / dead air.",
-    config.LABEL_FILLER:  "Low-information filler segment.",
-    config.LABEL_TRANSITION: "Transition / interstitial.",
-    config.LABEL_RECAP:   "Likely repeated/recap content.",
+    config.LABEL_AD:         "Detected as advertisement (visual + audio + speech cues).",
+    config.LABEL_INTRO:      "Detected as intro segment near video start.",
+    config.LABEL_OUTRO:      "Detected as outro segment near video end.",
+    config.LABEL_SILENCE:    "Long silence / dead air.",
+    config.LABEL_FILLER:     "Low-information filler segment.",
+    config.LABEL_TRANSITION: "Short black-and-silent transition between scenes.",
+    config.LABEL_HOLDING:    "Visually static holding card (no motion, no speech).",
+    config.LABEL_RECAP:      "Likely repeated/recap content.",
 }
 
 

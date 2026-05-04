@@ -7,6 +7,7 @@ and a zero ``ad_keyword_score`` so the rest of the pipeline still works.
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -17,6 +18,17 @@ from . import config
 
 
 log = logging.getLogger(__name__)
+
+
+# Cache directory for raw Whisper transcripts. Storing them lets us re-run
+# the pipeline deterministically and skip the (slow, slightly-stochastic
+# due to temperature fallback) Whisper transcription step on subsequent
+# runs of the same audio.
+_TRANSCRIPT_CACHE_DIR = config.INTERMEDIATE_DIR
+
+
+def _transcript_cache_path(audio_wav: Path, model_name: str) -> Path:
+    return audio_wav.parent / f"{audio_wav.stem}.whisper-{model_name}.json"
 
 
 @dataclass
@@ -58,58 +70,103 @@ def transcribe(audio_wav: Path | str,
                model_name: str = config.WHISPER_MODEL,
                language: str | None = config.WHISPER_LANGUAGE,
                num_seconds: int | None = None,
+               cache: bool = True,
                ) -> SpeechFeatures:
     """Run Whisper and produce per-second linguistic features.
+
+    The raw transcript is cached to disk next to the audio WAV so that
+    repeat pipeline runs are fully reproducible (Whisper's temperature
+    fallback can otherwise produce slightly different transcripts each
+    run, which propagates into different segmentation outputs).
 
     Returns an empty (but valid) ``SpeechFeatures`` if Whisper or its model
     weights are not available.
     """
     n = max(int(num_seconds or 0), 1)
+    audio_path = Path(audio_wav)
 
-    if not _whisper_available():
-        log.warning("Whisper not installed — skipping speech analysis. "
-                    "Install with: pip install -U openai-whisper")
-        return SpeechFeatures(
-            ad_keyword_score=np.zeros(n),
-            speech_density=np.zeros(n),
-            available=False,
-        )
+    # Try cache first.
+    raw_segments: list | None = None
+    cache_path = _transcript_cache_path(audio_path, model_name)
+    if cache and cache_path.exists():
+        try:
+            cached = json.loads(cache_path.read_text(encoding="utf-8"))
+            raw_segments = cached.get("segments") or []
+            log.info("Loaded cached Whisper transcript: %s (%d segments)",
+                      cache_path.name, len(raw_segments))
+        except Exception as exc:
+            log.warning("Failed to read transcript cache %s: %s",
+                         cache_path, exc)
+            raw_segments = None
 
-    try:
-        import whisper  # type: ignore
-        import soundfile as sf  # type: ignore
-
-        log.info("Loading Whisper model '%s'...", model_name)
-        model = whisper.load_model(model_name)
-
-        # Load audio ourselves to bypass Whisper's internal ffmpeg call
-        # (which fails on Windows when ffmpeg isn't on PATH). Whisper
-        # expects float32 mono @ 16 kHz.
-        audio_array, sr = sf.read(str(audio_wav), dtype="float32")
-        if audio_array.ndim > 1:
-            audio_array = audio_array.mean(axis=1)
-        if sr != 16_000:
-            import librosa  # type: ignore
-            audio_array = librosa.resample(
-                audio_array.astype(np.float32),
-                orig_sr=sr, target_sr=16_000,
+    if raw_segments is None:
+        if not _whisper_available():
+            log.warning("Whisper not installed - skipping speech analysis. "
+                        "Install with: pip install -U openai-whisper")
+            return SpeechFeatures(
+                ad_keyword_score=np.zeros(n),
+                speech_density=np.zeros(n),
+                available=False,
             )
-        result = model.transcribe(
-            audio_array,
-            language=language,
-            verbose=False,
-            fp16=False,
-            condition_on_previous_text=False,
-        )
-    except Exception as exc:
-        log.warning("Whisper failed (%s) — running without speech features.", exc)
-        return SpeechFeatures(
-            ad_keyword_score=np.zeros(n),
-            speech_density=np.zeros(n),
-            available=False,
-        )
 
-    raw_segments = result.get("segments") or []
+        try:
+            import whisper  # type: ignore
+            import soundfile as sf  # type: ignore
+
+            log.info("Loading Whisper model '%s'...", model_name)
+            model = whisper.load_model(model_name)
+
+            # Load audio ourselves to bypass Whisper's internal ffmpeg call
+            # (which fails on Windows when ffmpeg isn't on PATH). Whisper
+            # expects float32 mono @ 16 kHz.
+            audio_array, sr = sf.read(str(audio_path), dtype="float32")
+            if audio_array.ndim > 1:
+                audio_array = audio_array.mean(axis=1)
+            if sr != 16_000:
+                import librosa  # type: ignore
+                audio_array = librosa.resample(
+                    audio_array.astype(np.float32),
+                    orig_sr=sr, target_sr=16_000,
+                )
+            result = model.transcribe(
+                audio_array,
+                language=language,
+                verbose=False,
+                fp16=False,
+                condition_on_previous_text=False,
+            )
+        except Exception as exc:
+            log.warning("Whisper failed (%s) - running without speech features.", exc)
+            return SpeechFeatures(
+                ad_keyword_score=np.zeros(n),
+                speech_density=np.zeros(n),
+                available=False,
+            )
+
+        raw_segments = result.get("segments") or []
+        if cache:
+            try:
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_path.write_text(json.dumps({
+                    "model": model_name,
+                    "language": language,
+                    "segments": [
+                        {
+                            "start": float(s.get("start", 0.0)),
+                            "end": float(s.get("end", 0.0)),
+                            "text": str(s.get("text", "")),
+                            "no_speech_prob": float(s.get("no_speech_prob", 0.0)),
+                            "compression_ratio": float(s.get("compression_ratio", 0.0)),
+                            "avg_logprob": float(s.get("avg_logprob", 0.0)),
+                        }
+                        for s in raw_segments
+                    ],
+                }, indent=2), encoding="utf-8")
+                log.info("Cached Whisper transcript -> %s", cache_path.name)
+            except Exception as exc:
+                log.warning("Failed to write transcript cache %s: %s",
+                             cache_path, exc)
+
     segments = [
         SpeechSegment(
             start=float(s.get("start", 0.0)),

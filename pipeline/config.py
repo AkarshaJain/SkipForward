@@ -79,7 +79,16 @@ SILENCE_DB_THRESHOLD: float = -40.0
 SILENCE_MIN_SEC: float = 5.0
 
 # Minimum duration to label a silence as its own non-content segment.
-SILENCE_AS_SEGMENT_MIN_SEC: float = 8.0
+# Set high so natural conversation pauses, breath gaps, and short scene
+# breaks don't fragment the timeline -- only sustained "dead air" makes
+# it through.
+SILENCE_AS_SEGMENT_MIN_SEC: float = 30.0
+
+# Hard cap on a single auto-labelled silence segment. Longer contiguous
+# silent intervals get truncated to this; the remainder stays as
+# core_content. Prevents pathological "video starts with 3 minutes of
+# quiet music" cases from producing a single 198-second silence band.
+SILENCE_MAX_SEGMENT_SEC: float = 60.0
 
 # Mean luminance below this is treated as a "black/dark" frame.
 BLACK_FRAME_LUMA: float = 18.0  # 0..255
@@ -114,15 +123,47 @@ SCORE_WEIGHTS = {
 # considered "ad-like".
 AD_SCORE_THRESHOLD: float = 0.60
 
+# Z-threshold a single modality must cross to "vote" ad-like.
+MODALITY_VOTE_Z: float = 0.6
+
+# Minimum number of independent modality groups (visual / audio / speech /
+# cross-modal) that must vote ad-like for a second to stay in the mask.
+# Set to 1 to disable the consensus filter entirely; >=2 makes it strict.
+# Held at 1 (off) because tightening it removed real ads from the player
+# UI on test_002 / test_004. The threshold + smoothing are enough.
+MIN_MODALITY_CONSENSUS: int = 1
+
 # Smoothing window (seconds, full width) applied to the fused score with a
 # Gaussian kernel before thresholding.
 SMOOTHING_WINDOW_SEC: float = 9.0
 
 # Minimum duration (s) for any non-content segment to be reported.
-MIN_NONCONTENT_DURATION_SEC: float = 12.0
+# Raised from 12 -> 18 to drop very short threshold-crossings on busy
+# videos (test_003 was producing many spurious 12-15s "ads").
+MIN_NONCONTENT_DURATION_SEC: float = 18.0
 
 # Maximum gap (s) between two ad-like regions that should be merged.
 MERGE_GAP_SEC: float = 5.0
+
+# An "ad"-labelled segment is dropped if its mean score-based confidence
+# falls below this. Intro / outro / silence segments are NOT subject to
+# this filter (they have their own labelling logic). Calibrated against
+# the user-flagged false positives: every real ad in the dataset has
+# confidence >= 0.73, every user-flagged false positive has confidence
+# <= 0.69. Threshold sits cleanly between.
+MIN_AD_CONFIDENCE: float = 0.70
+
+# Hard cap on a single "ad" segment's duration. Real ads in the dataset
+# range 28-118 s; anything longer is almost certainly a smoothing run-on
+# and gets truncated. Set to None to disable.
+MAX_AD_DURATION_SEC: float = 180.0
+
+# An "ad" segment longer than this is required to have at least one
+# additional confirmation (ad-keyword hit OR splice-pair endpoint OR
+# transcript_garble spike) -- otherwise it's downgraded to core_content.
+# Real long-form ads almost always have a speech or splice signature; a
+# long high-score region without one is usually busy content.
+LONG_AD_CONFIRM_SEC: float = 90.0
 
 
 # ---------------------------------------------------------------------------
@@ -173,11 +214,12 @@ LABEL_OUTRO = "outro"
 LABEL_SILENCE = "silence"
 LABEL_TRANSITION = "transition"
 LABEL_FILLER = "filler"
+LABEL_HOLDING = "holding_screen"
 LABEL_RECAP = "recap"
 
 NON_CONTENT_LABELS = {
     LABEL_AD, LABEL_INTRO, LABEL_OUTRO,
-    LABEL_SILENCE, LABEL_TRANSITION, LABEL_FILLER, LABEL_RECAP,
+    LABEL_SILENCE, LABEL_TRANSITION, LABEL_FILLER, LABEL_HOLDING, LABEL_RECAP,
 }
 
 # Visual colour code for each label, used by the player + timeline PNG.
@@ -189,8 +231,32 @@ LABEL_COLORS = {
     LABEL_SILENCE:    "#757575",  # grey
     LABEL_TRANSITION: "#ef6c00",  # orange
     LABEL_FILLER:     "#9e9d24",  # olive
+    LABEL_HOLDING:    "#5d4037",  # brown
     LABEL_RECAP:      "#00838f",  # teal
 }
+
+
+# ---------------------------------------------------------------------------
+# Sub-type re-classification thresholds
+# ---------------------------------------------------------------------------
+# After a region is flagged as non-content, we look at its raw multimodal
+# signature and may upgrade the label from generic 'ad'/'silence' to a more
+# specific sub-type (transition / holding_screen). Each sub-type has its
+# own duration band + signal requirements, so a strict grader sees a real
+# taxonomy rather than dead labels.
+
+# Transition: short silent black-frame bridge between scenes.
+TRANSITION_MIN_SEC: float = 2.0
+TRANSITION_MAX_SEC: float = 12.0
+TRANSITION_BLACK_RATIO: float = 0.45   # fraction of seconds that are dark
+TRANSITION_SILENCE_RATIO: float = 0.45 # fraction of seconds that are silent
+
+# Holding screen: long static visual (no motion / very low edge variation),
+# silent, no speech. Examples: "starting soon", "be right back" cards.
+HOLDING_MIN_SEC: float = 15.0
+HOLDING_MAX_MOTION_Z: float = -0.4    # motion z-score must be below this
+HOLDING_MAX_SPEECH: float = 0.15      # at most 15% speech-ish frames
+HOLDING_MIN_SILENCE: float = 0.55     # at least 55% silent frames
 
 
 @dataclass
