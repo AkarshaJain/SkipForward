@@ -5,22 +5,8 @@
   "segments": [
     {
       "start": 0.0,
-      "end": 58.1,
-      "duration": 58.1,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 58.1,
-      "end": 81.0,
-      "duration": 22.9,
-      "label": "intro",
-      "confidence": 0.837
-    },
-    {
-      "start": 81.0,
       "end": 276.527,
-      "duration": 195.527,
+      "duration": 276.527,
       "label": "core_content",
       "confidence": 0.85
     },
@@ -29,7 +15,7 @@
       "end": 327.641,
       "duration": 51.114,
       "label": "ad",
-      "confidence": 0.778
+      "confidence": 0.767
     },
     {
       "start": 327.641,
@@ -54,15 +40,15 @@
     },
     {
       "start": 980.0,
-      "end": 1079.0,
-      "duration": 99.0,
+      "end": 1014.0,
+      "duration": 34.0,
       "label": "silence",
       "confidence": 0.95
     },
     {
-      "start": 1079.0,
+      "start": 1014.0,
       "end": 1122.636,
-      "duration": 43.636,
+      "duration": 108.636,
       "label": "core_content",
       "confidence": 0.85
     },
@@ -71,7 +57,7 @@
       "end": 1171.705,
       "duration": 49.07,
       "label": "ad",
-      "confidence": 0.925
+      "confidence": 0.876
     },
     {
       "start": 1171.705,
@@ -82,12 +68,6 @@
     }
   ],
   "skip_recommendations": [
-    {
-      "start": 58.1,
-      "end": 81.0,
-      "label": "intro",
-      "reason": "Detected as intro segment near video start."
-    },
     {
       "start": 276.527,
       "end": 327.641,
@@ -102,7 +82,7 @@
     },
     {
       "start": 980.0,
-      "end": 1079.0,
+      "end": 1014.0,
       "label": "silence",
       "reason": "Long silence / dead air."
     },
@@ -114,34 +94,21 @@
     }
   ],
   "summary": {
-    "total_segments": 11,
+    "total_segments": 9,
     "labels": {
-      "core_content": 6,
-      "intro": 1,
+      "core_content": 5,
       "ad": 3,
       "silence": 1
     },
-    "core_content_seconds": 1101.839,
-    "non_content_seconds": 248.663,
-    "non_content_ratio": 0.1841
+    "core_content_seconds": 1189.739,
+    "non_content_seconds": 160.763,
+    "non_content_ratio": 0.119
   },
   "timeline_map": [
     {
       "label": "core_content",
       "color": "#2e7d32",
       "start": 0.0,
-      "end": 58.1
-    },
-    {
-      "label": "intro",
-      "color": "#1565c0",
-      "start": 58.1,
-      "end": 81.0
-    },
-    {
-      "label": "core_content",
-      "color": "#2e7d32",
-      "start": 81.0,
       "end": 276.527
     },
     {
@@ -172,12 +139,12 @@
       "label": "silence",
       "color": "#757575",
       "start": 980.0,
-      "end": 1079.0
+      "end": 1014.0
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 1079.0,
+      "start": 1014.0,
       "end": 1122.636
     },
     {

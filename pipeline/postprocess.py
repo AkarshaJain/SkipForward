@@ -5,7 +5,7 @@ durations, and produce a clean, presentable timeline.
 from __future__ import annotations
 
 from . import config
-from .segmenter import Segment
+from .segmenter import Segment, _merge_nearby_ads_through_tiny_core
 
 
 def merge_adjacent(segments: list[Segment],
@@ -72,6 +72,7 @@ def enforce_min_duration(segments: list[Segment],
 def finalize(segments: list[Segment]) -> list[Segment]:
     """Apply the full clean-up sequence."""
     s = merge_adjacent(segments)
+    s = _merge_nearby_ads_through_tiny_core(s)
     s = absorb_tiny_core(s)
     s = enforce_min_duration(s)
     s = merge_adjacent(s)

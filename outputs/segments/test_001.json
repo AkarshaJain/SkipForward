@@ -5,17 +5,21 @@
   "segments": [
     {
       "start": 0.0,
-      "end": 4.017,
-      "duration": 4.017,
+      "end": 106.61,
+      "duration": 106.61,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 4.017,
+      "start": 106.61,
       "end": 210.207,
-      "duration": 206.19,
-      "label": "intro",
-      "confidence": 0.972
+      "duration": 103.597,
+      "label": "ad",
+      "confidence": 0.71,
+      "notes": {
+        "recovered_peak": true,
+        "tail_extended_to_splice": true
+      }
     },
     {
       "start": 210.207,
@@ -29,7 +33,7 @@
       "end": 658.402,
       "duration": 27.782,
       "label": "ad",
-      "confidence": 0.908
+      "confidence": 0.918
     },
     {
       "start": 658.402,
@@ -43,7 +47,7 @@
       "end": 1115.635,
       "duration": 22.594,
       "label": "ad",
-      "confidence": 0.908
+      "confidence": 0.951
     },
     {
       "start": 1115.635,
@@ -55,10 +59,10 @@
   ],
   "skip_recommendations": [
     {
-      "start": 4.017,
+      "start": 106.61,
       "end": 210.207,
-      "label": "intro",
-      "reason": "Detected as intro segment near video start."
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
       "start": 630.62,
@@ -77,24 +81,23 @@
     "total_segments": 7,
     "labels": {
       "core_content": 4,
-      "intro": 1,
-      "ad": 2
+      "ad": 3
     },
-    "core_content_seconds": 1201.859,
-    "non_content_seconds": 256.566,
-    "non_content_ratio": 0.1759
+    "core_content_seconds": 1304.452,
+    "non_content_seconds": 153.973,
+    "non_content_ratio": 0.1056
   },
   "timeline_map": [
     {
       "label": "core_content",
       "color": "#2e7d32",
       "start": 0.0,
-      "end": 4.017
+      "end": 106.61
     },
     {
-      "label": "intro",
-      "color": "#1565c0",
-      "start": 4.017,
+      "label": "ad",
+      "color": "#c62828",
+      "start": 106.61,
       "end": 210.207
     },
     {

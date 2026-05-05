@@ -163,16 +163,101 @@ MAX_AD_DURATION_SEC: float = 180.0
 # transcript_garble spike) -- otherwise it's downgraded to core_content.
 # Real long-form ads almost always have a speech or splice signature; a
 # long high-score region without one is usually busy content.
-LONG_AD_CONFIRM_SEC: float = 90.0
+LONG_AD_CONFIRM_SEC: float = 78.0
+
+# Splice corridors longer than this are not merged into the per-second fused
+# ad mask — very wide pairs often bracket mixed content plus real inserts at
+# the edges (painting them makes one giant run-on "ad").
+SPLICE_MASK_MAX_SPAN_SEC: float = 130.0
 
 
 # ---------------------------------------------------------------------------
 # Intro / outro heuristics
 # ---------------------------------------------------------------------------
 
-# Anything in the first INTRO_WINDOW_SEC that looks like non-content is
-# reclassified as "intro" instead of "ad".
+# Anything in the first INTRO_WINDOW_SEC that looks like non-content may be
+# labelled "intro"; only the overlap with [0, INTRO_WINDOW) uses that rule.
 INTRO_WINDOW_SEC: float = 60.0
+
+# If a non-content region *starts* at or after this second, it cannot be an
+# "intro" (late-onset bumps are bumps into show or mid-roll, not bumper).
+INTRO_LATEST_LEGITIMATE_START_SEC: float = 42.0
+
+# Demote positional "intro" / "outro" to core when confidence is barely above
+# the main threshold (typical hallucinated bumps like test_002 58-81 s).
+MIN_INTRO_OUTRO_DISPLAY_CONFIDENCE: float = 0.88
+
+# Short "ad" segments starting *just after* the intro window were being
+# demoted up to start < INTRO_WINDOW + 150 s. That incorrectly nuked real
+# post-intro inserts (e.g. ~151 s). Only demote weak short ads that start
+# still "near" the intro bumper (false texture), not several minutes in.
+NEAR_INTRO_VOLATILE_SHORT_AD_DEMOTE_MAX_START_SEC: float = 108.0
+
+# When treating splice endpoints as independent confirmation in *strict*
+# paths (ad spacing + mid-roll precision), require at least this pair
+# confidence. Weak splice hits in the middle of lecture audio cause false
+# "secondary evidence" and clustered phantom ads.
+STRICT_SECONDARY_SPLICE_MIN_CONF: float = 0.41
+
+# Stricter music / anomaly bars when splice_pair_min_conf is active (spacing +
+# precision filter). Lecture beds often flirt with the baseline music leg.
+SECONDARY_MUSIC_LIKELINESS_MEAN_Z: float = 1.05
+STRICT_SECONDARY_MUSIC_LIKELINESS_MEAN_Z: float = 1.16
+
+SECONDARY_OUTLIER_MAX_Z: float = 1.25
+STRICT_SECONDARY_OUTLIER_MAX_Z: float = 1.38
+
+# Mid-roll ads without keyword / garble / music / outlier / strong-splice
+# evidence must still show a healthy mean normalized score, or they are
+# usually mask texture inside speech-heavy content.
+MIDROLL_AD_MEAN_FLOOR_WITHOUT_STRICT_EVIDENCE: float = 0.632
+
+# Slightly lower floor for recovered (sub-threshold) peaks so we do not
+# immediately erase legitimate weak inserts after recovery.
+MIDROLL_AD_MEAN_FLOOR_RECOVERED_PEAK_DELTA: float = 0.042
+
+# After filtering, optionally extend truncated ads toward the next strong
+# splice endpoint when the extension window stays ad-like on the norm curve.
+AD_TAIL_EXTEND_MAX_FORWARD_SEC: float = 88.0
+AD_TAIL_EXTEND_MIN_CHUNK_MEAN_NORM: float = 0.405
+AD_TAIL_EXTEND_SPLICE_ENDPOINT_MIN_PAIR_CONF: float = 0.52
+# Recoveries may cross a lecturer core score dip; still trust outward splice
+# bookends when the splice pair confidence is editorial-grade.
+AD_TAIL_HIGH_TRUST_SPLICE_PAIR_CONF: float = 0.91
+
+# Recovering sub-threshold "ads" in the opening minutes requires the same tight
+# evidence used for spacing (strict splice overlap + raised music/anomaly bars).
+RECOVERY_REQUIRES_STRICT_BEFORE_SEC: float = 300.0
+
+# Merge two neighbouring ``ad`` spans when a *tiny* slice of ``core_content``
+# sits between them (false split from morphology / jitter). Only when each
+# flanking ad is short so we do not bridge independent mid-rolls.
+MIDROLL_NEAR_AD_GAP_MERGE_CORE_MAX_SEC: float = 42.0
+MIDROLL_NEAR_AD_MERGE_EACH_MAX_SEC: float = 72.0
+MIDROLL_NEAR_AD_MERGED_SPAN_CAP_SEC: float = 125.0
+
+# After a confirmed ad ends, suppress new "ad" segments that start sooner than
+# this unless they pass strong-evidence shortcut (below). Kills clustered
+# false positives while leaving room for spaced real inserts (few minutes).
+MIN_GAP_BETWEEN_ADS_SEC: float = 285.0
+
+# During the post-ad cooldown, only keep an ad shorter than this if it has
+# strong secondary evidence — real mid-rolls later are typically longer anyway.
+SHORT_AD_NEED_EVIDENCE_MAX_SEC: float = 52.0
+
+# Sub-threshold recovered ad regions (within long core gaps) use this cutoff
+# on normalized score curve.
+AD_RECOVERY_NORM_THRESHOLD: float = 0.52
+
+# Secondary floor on max normalized score inside a candidate recovery interval.
+AD_RECOVERY_PEAK_THRESHOLD: float = 0.605
+
+# Recover only within core spans at least this long (long podcast gaps).
+MIN_CORE_SPAN_FOR_RECOVERY_SCAN_SEC: float = 240.0
+
+# Recovered (sub-threshold score) ads shorter than this are usually texture
+# spikes, not real inserts — the dataset's real ads are >= ~28 s.
+MIN_RECOVERED_AD_DURATION_SEC: float = 26.5
 
 # Anything in the last OUTRO_WINDOW_SEC similarly becomes "outro".
 OUTRO_WINDOW_SEC: float = 60.0

@@ -26,71 +26,46 @@
     },
     {
       "start": 528.761,
-      "end": 553.941,
-      "duration": 25.179,
-      "label": "ad",
-      "confidence": 0.821
-    },
-    {
-      "start": 553.941,
-      "end": 587.86,
-      "duration": 33.919,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 587.86,
       "end": 615.536,
-      "duration": 27.676,
+      "duration": 86.774,
       "label": "ad",
-      "confidence": 0.785
+      "confidence": 0.803,
+      "notes": {
+        "merged_adjacent_core_gap_sec": 33.919
+      }
     },
     {
       "start": 615.536,
-      "end": 768.275,
-      "duration": 152.739,
+      "end": 1041.916,
+      "duration": 426.38,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 768.275,
-      "end": 789.917,
-      "duration": 21.642,
+      "start": 1041.916,
+      "end": 1097.269,
+      "duration": 55.352,
       "label": "ad",
-      "confidence": 0.779
+      "confidence": 0.9
     },
     {
-      "start": 789.917,
-      "end": 1743.81,
-      "duration": 953.893,
+      "start": 1097.269,
+      "end": 1183.419,
+      "duration": 86.15,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 1743.81,
-      "end": 1767.324,
-      "duration": 23.514,
-      "label": "outro",
-      "confidence": 0.622
+      "start": 1183.419,
+      "end": 1256.459,
+      "duration": 73.04,
+      "label": "ad",
+      "confidence": 0.714
     },
     {
-      "start": 1767.324,
-      "end": 1776.689,
-      "duration": 9.364,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 1776.689,
-      "end": 1805.821,
-      "duration": 29.133,
-      "label": "outro",
-      "confidence": 0.689
-    },
-    {
-      "start": 1805.821,
+      "start": 1256.459,
       "end": 1826.506,
-      "duration": 20.684,
+      "duration": 570.047,
       "label": "core_content",
       "confidence": 0.85
     }
@@ -104,45 +79,32 @@
     },
     {
       "start": 528.761,
-      "end": 553.941,
-      "label": "ad",
-      "reason": "Detected as advertisement (visual + audio + speech cues)."
-    },
-    {
-      "start": 587.86,
       "end": 615.536,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
-      "start": 768.275,
-      "end": 789.917,
+      "start": 1041.916,
+      "end": 1097.269,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
-      "start": 1743.81,
-      "end": 1767.324,
-      "label": "outro",
-      "reason": "Detected as outro segment near video end."
-    },
-    {
-      "start": 1776.689,
-      "end": 1805.821,
-      "label": "outro",
-      "reason": "Detected as outro segment near video end."
+      "start": 1183.419,
+      "end": 1256.459,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
     }
   ],
   "summary": {
-    "total_segments": 13,
+    "total_segments": 9,
     "labels": {
-      "core_content": 7,
-      "ad": 4,
-      "outro": 2
+      "core_content": 5,
+      "ad": 4
     },
-    "core_content_seconds": 1606.344,
-    "non_content_seconds": 220.161,
-    "non_content_ratio": 0.1205
+    "core_content_seconds": 1518.322,
+    "non_content_seconds": 308.184,
+    "non_content_ratio": 0.1687
   },
   "timeline_map": [
     {
@@ -167,60 +129,36 @@
       "label": "ad",
       "color": "#c62828",
       "start": 528.761,
-      "end": 553.941
-    },
-    {
-      "label": "core_content",
-      "color": "#2e7d32",
-      "start": 553.941,
-      "end": 587.86
-    },
-    {
-      "label": "ad",
-      "color": "#c62828",
-      "start": 587.86,
       "end": 615.536
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
       "start": 615.536,
-      "end": 768.275
+      "end": 1041.916
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 768.275,
-      "end": 789.917
+      "start": 1041.916,
+      "end": 1097.269
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 789.917,
-      "end": 1743.81
+      "start": 1097.269,
+      "end": 1183.419
     },
     {
-      "label": "outro",
-      "color": "#6a1b9a",
-      "start": 1743.81,
-      "end": 1767.324
-    },
-    {
-      "label": "core_content",
-      "color": "#2e7d32",
-      "start": 1767.324,
-      "end": 1776.689
-    },
-    {
-      "label": "outro",
-      "color": "#6a1b9a",
-      "start": 1776.689,
-      "end": 1805.821
+      "label": "ad",
+      "color": "#c62828",
+      "start": 1183.419,
+      "end": 1256.459
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 1805.821,
+      "start": 1256.459,
       "end": 1826.506
     }
   ],

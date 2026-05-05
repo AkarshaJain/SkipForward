@@ -1,10 +1,10 @@
 {
   "duration_sec": 1826.506,
   "per_second": {
-    "precision": 0.2699,
+    "precision": 0.1949,
     "recall": 0.3228,
-    "f1": 0.294,
-    "iou": 0.1723
+    "f1": 0.243,
+    "iou": 0.1383
   },
   "regions": {
     "detection_rate": 0.3333,
@@ -33,5 +33,5 @@
       }
     ]
   },
-  "summary": "GT ads: 3 | Predicted non-content regions: 6 | Detected (IoU>0.30): 1/3 (33%) | Mean region IoU: 0.22 | Per-second F1: 0.29"
+  "summary": "GT ads: 3 | Predicted non-content regions: 4 | Detected (IoU>0.30): 1/3 (33%) | Mean region IoU: 0.22 | Per-second F1: 0.24"
 }
