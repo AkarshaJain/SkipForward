@@ -21,6 +21,9 @@ desktop.ini
 
 # Project-specific -------------------------------------------------------
 
+# Optional local staging (GT JSON lives under video_info/; use run_pipeline --video).
+Test/
+
 # Course-provided input dataset (large MP4s; test_003.mp4 exceeds GitHub's
 # 100 MB per-file limit and the dataset is not ours to redistribute).
 videos_with_ads/

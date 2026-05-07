@@ -90,6 +90,21 @@ class _RangeHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):  # noqa: A002
         return
 
+    def copyfile(self, source, outputfile):
+        """Stream body; swallow client disconnect (browser seek / reload / close)."""
+        try:
+            super().copyfile(source, outputfile)
+        except BrokenPipeError:
+            pass
+        except ConnectionResetError:
+            pass
+        except ConnectionAbortedError:
+            pass
+        except OSError as exc:
+            # 10053: aborted by local stack; 10054: remote reset — both are benign.
+            if getattr(exc, "winerror", None) not in (10053, 10054):
+                raise
+
     def end_headers(self):
         self.send_header("Cache-Control", "no-store, must-revalidate")
         self.send_header("Accept-Ranges", "bytes")
