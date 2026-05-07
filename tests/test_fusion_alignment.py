@@ -1,7 +1,7 @@
 """Fusion / alignment tests.
 
 Proves that fuse() correctly handles per-modality arrays of slightly
-different lengths and produces a clean (N, C) matrix at 1 Hz.
+different lengths and produces a clean (N, C) matrix at SAMPLE_FPS Hz.
 """
 
 from __future__ import annotations
@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from pipeline import config
 from pipeline.fusion import (
     CHANNELS, FusedFeatures, fuse, _align_length, _zscore, _local_outlierness,
 )
@@ -91,8 +92,9 @@ def test_local_outlierness_high_in_anomalous_window():
 
 
 def test_fuse_produces_correct_shape_and_channel_order():
-    n = 60
-    fused = fuse(duration_sec=float(n),
+    duration_sec = 60
+    n = int(np.ceil(duration_sec * config.SAMPLE_FPS))
+    fused = fuse(duration_sec=float(duration_sec),
                   visual=_stub_visual(n),
                   audio=_stub_audio(n),
                   speech=_stub_speech(n))
@@ -105,10 +107,11 @@ def test_fuse_produces_correct_shape_and_channel_order():
 
 
 def test_fuse_handles_off_by_one_channel_lengths():
-    n = 60
+    duration_sec = 60
+    n = int(np.ceil(duration_sec * config.SAMPLE_FPS))
     visual = _stub_visual(n - 1)        # short by 1
     audio = _stub_audio(n + 2)          # long by 2
     speech = _stub_speech(n)
-    fused = fuse(duration_sec=float(n),
+    fused = fuse(duration_sec=float(duration_sec),
                   visual=visual, audio=audio, speech=speech)
     assert fused.matrix.shape == (n, len(CHANNELS))

@@ -57,10 +57,14 @@ def test_hist_distance_large_for_unrelated_frames():
 # Splice-boundary detector
 # ---------------------------------------------------------------------------
 
+def _steps(seconds: float) -> int:
+    return int(round(seconds * config.SAMPLE_FPS))
+
+
 def test_no_splice_when_no_evidence():
     """A shot cut with no nearby silence and no black frame is NOT a splice."""
     shots = np.array([60.0])
-    black = np.zeros(120)
+    black = np.zeros(_steps(120))
     splices = detect_splice_boundaries(
         shot_times=shots,
         silence_intervals=[],
@@ -73,7 +77,7 @@ def test_no_splice_when_no_evidence():
 def test_splice_detected_when_silence_brackets_cut():
     shots = np.array([60.0])
     silence = [(58.0, 62.0)]   # 4-s silent gap straddles the cut
-    black = np.zeros(120)
+    black = np.zeros(_steps(120))
     splices = detect_splice_boundaries(
         shot_times=shots,
         silence_intervals=silence,
@@ -85,7 +89,7 @@ def test_splice_detected_when_silence_brackets_cut():
 
 def test_splice_detected_when_black_frame_at_cut():
     shots = np.array([60.0])
-    black = np.zeros(120); black[60] = 1.0
+    black = np.zeros(_steps(120)); black[_steps(60)] = 1.0
     splices = detect_splice_boundaries(
         shot_times=shots,
         silence_intervals=[],
@@ -97,12 +101,13 @@ def test_splice_detected_when_black_frame_at_cut():
 
 def test_splice_signal_per_second_decays_around_splice():
     sig = splice_signal_per_second([30.0], duration_sec=60.0, kernel_sec=2.0)
-    assert sig.shape == (60,)
-    assert sig[30] == pytest.approx(1.0, abs=1e-6)
-    assert sig[28] < sig[30]
-    assert sig[32] < sig[30]
-    assert sig[10] == 0.0
-    assert sig[50] == 0.0
+    assert sig.shape == (_steps(60),)
+    centre = _steps(30)
+    assert sig[centre] == pytest.approx(1.0, abs=1e-6)
+    assert sig[centre - _steps(1)] < sig[centre]
+    assert sig[centre + _steps(1)] < sig[centre]
+    assert sig[_steps(10)] == 0.0
+    assert sig[_steps(50)] == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +116,7 @@ def test_splice_signal_per_second_decays_around_splice():
 
 def test_shot_rate_zero_when_no_cuts():
     rate = shot_rate_per_second(np.array([]), duration_sec=60.0)
-    assert rate.shape == (60,)
+    assert rate.shape == (_steps(60),)
     assert rate.sum() == 0.0
 
 
@@ -119,4 +124,5 @@ def test_shot_rate_increases_with_cut_density():
     sparse = shot_rate_per_second(np.array([30.0]), duration_sec=60.0)
     dense = shot_rate_per_second(
         np.linspace(20.0, 40.0, num=20), duration_sec=60.0)
-    assert dense[30] > sparse[30] * 5
+    centre = _steps(30)
+    assert dense[centre] > sparse[centre] * 5

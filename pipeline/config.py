@@ -35,10 +35,35 @@ for _d in (OUTPUT_DIR, SEGMENTS_DIR, TIMELINES_DIR, INTERMEDIATE_DIR, EVAL_DIR):
 # Sampling / preprocessing
 # ---------------------------------------------------------------------------
 
-# We analyse video at a coarse temporal grid of 1 frame / second.
-# Shot detection internally uses a denser grid (every Nth frame at native fps)
-# but the fused feature matrix is at 1 Hz to keep memory + compute small.
-SAMPLE_FPS: float = 1.0
+# Temporal grid for the fused feature matrix and downstream segmenter.
+# At SAMPLE_FPS rows per second, a 30-min video produces SAMPLE_FPS*1800
+# rows. Shot detection internally uses a denser grid (every Nth frame at
+# native fps) regardless of this setting.
+#
+# IMPORTANT: many downstream calculations convert seconds to indices via
+# the ``sec_to_idx`` / ``idx_to_sec`` helpers below. If you bump this,
+# the helpers + structuring-width multiplications throughout the pipeline
+# keep everything in alignment. Tests and synthetic inputs in tests/
+# also call ``sec_to_idx`` so they remain valid.
+SAMPLE_FPS: float = 2.0
+
+
+def sec_to_idx(t: float) -> int:
+    """Convert a time in seconds to an integer row index in the
+    ``SAMPLE_FPS``-Hz feature grid."""
+    return int(round(t * SAMPLE_FPS))
+
+
+def idx_to_sec(i: int) -> float:
+    """Inverse of ``sec_to_idx``. Returns the start-time of row ``i``."""
+    return float(i) / SAMPLE_FPS
+
+
+def sec_to_width(seconds: float) -> int:
+    """Convert a duration-in-seconds to a number of grid steps. Used for
+    morphology structuring elements (binary_closing / binary_opening)
+    and for window lengths expressed in seconds."""
+    return max(int(round(seconds * SAMPLE_FPS)), 1)
 
 # Frame size used for visual feature extraction (smaller = faster, still expressive).
 FRAME_RESIZE: Tuple[int, int] = (320, 180)
@@ -175,7 +200,20 @@ LONG_AD_CONFIRM_SEC: float = 90.0
 INTRO_WINDOW_SEC: float = 60.0
 
 # Anything in the last OUTRO_WINDOW_SEC similarly becomes "outro".
-OUTRO_WINDOW_SEC: float = 60.0
+# Widened from 60 -> 120 so an outro detected by splice-pair logic that
+# finishes ~100 s before end-of-video (e.g. credits + post-roll fade)
+# is still labelled outro. Going much higher conflates true mid-video
+# ads in short clips with outros.
+OUTRO_WINDOW_SEC: float = 120.0
+
+# Hard cap on the duration of an intro / outro segment. Without this, a
+# splice-pair-detected non-content region whose start lies in the intro
+# window can extend deep into the video (e.g. 12 -> 240). When the region
+# exceeds this cap, only the first INTRO portion is kept as "intro";
+# the remainder is left as core_content (or relabelled "ad" if it's
+# inside the body of the video).
+MAX_INTRO_DURATION_SEC: float = 60.0
+MAX_OUTRO_DURATION_SEC: float = 120.0
 
 
 # ---------------------------------------------------------------------------

@@ -188,14 +188,21 @@ def extract_visual_features(video_path: Path | str,
 def shot_rate_per_second(shot_times: np.ndarray,
                           duration_sec: float,
                           window_sec: float = 15.0) -> np.ndarray:
-    """Number of cuts in a sliding window centred on each second."""
-    n = max(int(np.ceil(duration_sec)), 1)
+    """Number of cuts in a sliding window centred on each grid step.
+
+    Returns an array of length ``ceil(duration_sec * SAMPLE_FPS)`` -- one
+    row per ``1/SAMPLE_FPS`` seconds. The function name predates the
+    SAMPLE_FPS change but is kept for backwards-compatibility; despite
+    "per_second", the array is at SAMPLE_FPS Hz.
+    """
+    n = max(int(np.ceil(duration_sec * config.SAMPLE_FPS)), 1)
     rate = np.zeros(n, dtype=np.float64)
     if shot_times.size == 0:
         return rate
     half = window_sec / 2.0
     for s in range(n):
-        lo, hi = s - half, s + half
+        t = s / config.SAMPLE_FPS  # row centre, in seconds
+        lo, hi = t - half, t + half
         rate[s] = float(np.sum((shot_times >= lo) & (shot_times <= hi)))
     rate /= window_sec / 60.0
     return rate
@@ -253,9 +260,10 @@ def detect_splice_boundaries(
         sd = F.std(axis=0, keepdims=True) + 1e-6
         F = (F - mu) / sd
 
-        W = max(int(discontinuity_window_sec), 2)
+        # discontinuity_window_sec is in seconds; convert to step count.
+        W = max(int(round(discontinuity_window_sec * config.SAMPLE_FPS)), 2)
         for t in shot_times:
-            i = int(round(t))
+            i = int(round(t * config.SAMPLE_FPS))
             a0, a1 = max(0, i - W), max(0, i)
             b0, b1 = min(n, i + 1), min(n, i + 1 + W)
             if a1 - a0 < 2 or b1 - b0 < 2:
@@ -279,9 +287,10 @@ def detect_splice_boundaries(
                     or np.min(np.abs(sil_ends - t)) <= silence_window_sec):
                 near_sil = True
 
-        # (b) black/dark frame proximity
-        i = int(round(t))
-        lo, hi = max(0, i - 1), min(len(black_frame_per_sec), i + 2)
+        # (b) black/dark frame proximity (±1 second on the SAMPLE_FPS grid)
+        i = int(round(t * config.SAMPLE_FPS))
+        step = max(int(config.SAMPLE_FPS), 1)
+        lo, hi = max(0, i - step), min(len(black_frame_per_sec), i + step + 1)
         near_black = bool(black_frame_per_sec[lo:hi].max() > 0.5) if hi > lo else False
 
         # (c) content discontinuity
@@ -295,13 +304,19 @@ def detect_splice_boundaries(
 def splice_signal_per_second(splice_times: list[float],
                               duration_sec: float,
                               kernel_sec: float = 2.0) -> np.ndarray:
-    """Return a soft 0..1 indicator that decays away from each splice point."""
-    n = max(int(np.ceil(duration_sec)), 1)
+    """Return a soft 0..1 indicator that decays away from each splice point.
+
+    Output array is at ``config.SAMPLE_FPS`` Hz despite the legacy name.
+    """
+    n = max(int(np.ceil(duration_sec * config.SAMPLE_FPS)), 1)
     sig = np.zeros(n, dtype=np.float64)
+    kernel_steps = max(int(round(kernel_sec * config.SAMPLE_FPS)), 1)
     for t in splice_times:
-        i = int(round(t))
-        lo = max(0, i - int(kernel_sec))
-        hi = min(n, i + int(kernel_sec) + 1)
+        i = int(round(t * config.SAMPLE_FPS))
+        lo = max(0, i - kernel_steps)
+        hi = min(n, i + kernel_steps + 1)
         for j in range(lo, hi):
-            sig[j] = max(sig[j], 1.0 - abs(j - t) / max(kernel_sec, 1e-6))
+            # decay measured in seconds
+            j_sec = j / config.SAMPLE_FPS
+            sig[j] = max(sig[j], 1.0 - abs(j_sec - t) / max(kernel_sec, 1e-6))
     return sig

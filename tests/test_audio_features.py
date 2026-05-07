@@ -22,9 +22,10 @@ def test_silent_wav_is_detected_silent(silent_wav):
     wav = silent_wav(seconds=8.0)
     feats = extract_audio_features(wav, num_seconds=8)
 
-    assert feats.silence.shape == (8,)
-    assert feats.silence.sum() == 8, (
-        "every second of a silent WAV must be flagged silent")
+    expected_n = int(np.ceil(8 * config.SAMPLE_FPS))
+    assert feats.silence.shape == (expected_n,)
+    assert feats.silence.sum() == expected_n, (
+        "every step of a silent WAV must be flagged silent")
     assert feats.rms_db.max() < -50.0, (
         f"silent WAV RMS should be deeply negative, got {feats.rms_db.max():.2f} dB")
 
@@ -85,9 +86,11 @@ def test_silence_in_the_middle_is_recovered(mixed_wav):
 
 def test_audio_features_align_to_requested_length(noise_wav):
     """Even if the WAV is slightly shorter/longer than num_seconds requested,
-    every per-second array comes back at exactly that length."""
+    every per-step array comes back at length = num_seconds * SAMPLE_FPS."""
     wav = noise_wav(seconds=4.7)
     feats = extract_audio_features(wav, num_seconds=5)
+    expected_n = int(np.ceil(5 * config.SAMPLE_FPS))
     for arr in (feats.rms_db, feats.zcr, feats.music_likeness,
                 feats.silence, feats.spectral_flux):
-        assert arr.shape == (5,), f"expected length 5, got {arr.shape}"
+        assert arr.shape == (expected_n,), (
+            f"expected length {expected_n}, got {arr.shape}")

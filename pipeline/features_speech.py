@@ -82,7 +82,8 @@ def transcribe(audio_wav: Path | str,
     Returns an empty (but valid) ``SpeechFeatures`` if Whisper or its model
     weights are not available.
     """
-    n = max(int(num_seconds or 0), 1)
+    secs = max(int(num_seconds or 0), 1)
+    n = max(int(np.ceil(secs * config.SAMPLE_FPS)), 1)
     audio_path = Path(audio_wav)
 
     # Try cache first.
@@ -187,8 +188,9 @@ def transcribe(audio_wav: Path | str,
     keyword_lc = [k.lower() for k in config.AD_KEYWORDS]
 
     for seg in segments:
-        a = max(0, int(np.floor(seg.start)))
-        b = min(n, int(np.ceil(seg.end)))
+        # Convert seconds → step indices on the SAMPLE_FPS grid.
+        a = max(0, int(np.floor(seg.start * config.SAMPLE_FPS)))
+        b = min(n, int(np.ceil(seg.end * config.SAMPLE_FPS)))
         if b <= a:
             continue
         text_lc = seg.text.lower()

@@ -47,8 +47,9 @@ class Segment:
 
 
 def _smooth(arr: np.ndarray, sigma_sec: float) -> np.ndarray:
-    sigma = max(sigma_sec / 2.355, 0.5)  # FWHM → sigma
-    return gaussian_filter1d(arr, sigma=sigma, mode="nearest")
+    # Convert FWHM-in-seconds to a sigma in *grid steps*.
+    sigma_steps = max((sigma_sec / 2.355) * config.SAMPLE_FPS, 0.5)
+    return gaussian_filter1d(arr, sigma=sigma_steps, mode="nearest")
 
 
 def compute_ad_score(features: FusedFeatures,
@@ -140,8 +141,8 @@ def _modality_consensus(features: FusedFeatures) -> np.ndarray:
         return np.zeros(0, dtype=int)
 
     # Smooth modality votes over a few seconds so a transient blip in one
-    # channel doesn't flicker the consensus on/off.
-    sigma = max(config.SMOOTHING_WINDOW_SEC / 2.355, 1.0)
+    # channel doesn't flicker the consensus on/off. Sigma is in grid steps.
+    sigma = max((config.SMOOTHING_WINDOW_SEC / 2.355) * config.SAMPLE_FPS, 1.0)
 
     votes = np.zeros(n, dtype=np.int32)
     for _name, channels in _MODALITY_GROUPS.items():
@@ -192,35 +193,55 @@ def segment(features: FusedFeatures,
     # cut+silence splice points are captured even when their content is
     # statistically similar to the surrounding video.
     for a, b, _conf in splice_pairs:
-        ai = max(0, int(round(a)))
-        bi = min(len(mask), int(round(b)))
+        ai = max(0, config.sec_to_idx(a))
+        bi = min(len(mask), config.sec_to_idx(b))
         if bi > ai:
             mask[ai:bi] = True
 
-    # Morphological smoothing on the binary mask:
+    # Morphological smoothing on the binary mask. Widths are expressed in
+    # seconds in config and scaled to grid steps here.
     #   - close gaps shorter than MERGE_GAP_SEC
     #   - drop runs shorter than MIN_NONCONTENT_DURATION_SEC
-    close_w = max(int(config.MERGE_GAP_SEC), 1)
-    open_w = max(int(config.MIN_NONCONTENT_DURATION_SEC), 1)
+    close_w = config.sec_to_width(config.MERGE_GAP_SEC)
+    open_w = config.sec_to_width(config.MIN_NONCONTENT_DURATION_SEC)
     mask = binary_closing(mask, structure=np.ones(close_w))
     mask = binary_opening(mask, structure=np.ones(open_w))
 
     runs = _runs_of_true(mask.astype(bool))
 
-    # Helper: lookup confidence for a splice-pair containing the given range
+    # Helper: lookup confidence for a splice-pair overlapping the run.
+    # Previously this required the run to be CONTAINED in the splice pair,
+    # but mask-closing / shot-snapping often shifts run boundaries a bit
+    # outside the original splice pair. Using majority-overlap is more
+    # robust and still attributes credit to the right splice pair.
     splice_lookup = list(splice_pairs)
 
     def _splice_conf(a: int, b: int) -> float:
+        """Lookup splice-pair confidence by overlap. ``a``, ``b`` are
+        run indices on the SAMPLE_FPS grid; splice pair times are
+        seconds, so they get converted before comparison."""
+        best = 0.0
         for sa, sb, sc in splice_lookup:
-            if a >= int(round(sa)) - 1 and b <= int(round(sb)) + 1:
-                return float(sc)
-        return 0.0
+            sa_i, sb_i = config.sec_to_idx(sa), config.sec_to_idx(sb)
+            ov_a = max(a, sa_i)
+            ov_b = min(b, sb_i)
+            ov_len = max(0, ov_b - ov_a)
+            sp_len = max(1, sb_i - sa_i)
+            run_len = max(1, b - a)
+            # Splice pair counts if at least half of either side overlaps.
+            if ov_len / sp_len >= 0.5 or ov_len / run_len >= 0.5:
+                if sc > best:
+                    best = float(sc)
+        return best
 
-    # Build raw non-content regions (label = "ad" tentatively, will be reclassified)
+    # Build raw non-content regions (label = "ad" tentatively, will be reclassified).
+    # Run indices ``a, b`` are on the SAMPLE_FPS grid; convert to seconds
+    # before snapping, comparing to durations, etc.
     n = features.z.shape[0]
     nc_regions: list[tuple[float, float, float]] = []
     for a, b in runs:
-        a_t, b_t = float(a), float(b)
+        a_t = config.idx_to_sec(a)
+        b_t = config.idx_to_sec(b)
         a_t, b_t = _snap_to_shots(a_t, b_t, shot_times,
                                    max_snap_sec=config.MERGE_GAP_SEC)
         if b_t - a_t < config.MIN_NONCONTENT_DURATION_SEC:
@@ -321,7 +342,8 @@ def _reclassify_subtypes(segments: list[Segment],
             out.append(seg)
             continue
 
-        a, b = int(round(seg.start)), int(round(seg.end))
+        a = config.sec_to_idx(seg.start)
+        b = config.sec_to_idx(seg.end)
         dur = seg.end - seg.start
 
         black_ratio = _region_stat(black, a, b)
@@ -421,7 +443,8 @@ def _filter_ad_segments(segments: list[Segment],
             out.append(seg)
             continue
 
-        a, b = int(round(seg.start)), int(round(seg.end))
+        a = config.sec_to_idx(seg.start)
+        b = config.sec_to_idx(seg.end)
         dur = seg.end - seg.start
 
         # Filter 1: confidence floor
@@ -440,7 +463,7 @@ def _filter_ad_segments(segments: list[Segment],
                                 confidence=0.85)
             seg = Segment(seg.start, seg.start + cap, seg.label,
                            confidence=seg.confidence, notes=seg.notes)
-            b = int(round(seg.end))
+            b = config.sec_to_idx(seg.end)
             dur = cap
 
         # Filter 3: long ads must be confirmed by an independent signal.
@@ -489,18 +512,53 @@ def _label_and_fill(*,
         else:
             merged.append(seg)
 
-    # Reclassify __candidate__ as intro/outro/ad based on position
+    # Reclassify __candidate__ as intro/outro/ad based on position.
+    # Intro / outro segments are also capped at MAX_INTRO_DURATION_SEC /
+    # MAX_OUTRO_DURATION_SEC so a splice-pair region whose start lies in
+    # the intro window doesn't paint the whole first half of the video
+    # blue.
+    #
+    # IMPORTANT: when a candidate region is too long (because mask
+    # binary-closing merged the intro splice-pair with downstream ad
+    # regions), the truncated tail is re-emitted as another candidate
+    # so it can still be labelled (recursively) as ad / outro. Without
+    # this, capping the intro would silently swallow real ads in the
+    # body of the video as core_content.
     relabelled: list[tuple[float, float, str, float]] = []
+    intro_cap = getattr(config, "MAX_INTRO_DURATION_SEC", None)
+    outro_cap = getattr(config, "MAX_OUTRO_DURATION_SEC", None)
+
+    def _emit_candidate(s: float, e: float, c: float) -> None:
+        if e <= s:
+            return
+        if s < intro_window:
+            # Symmetric to the outro extension: an intro detected near the
+            # start should extend back to t=0 (cold-open / quiet title
+            # card). Snap start to 0 then cap at MAX_INTRO_DURATION_SEC.
+            s_snap = 0.0
+            cut = min(e, s_snap + intro_cap) if intro_cap else e
+            relabelled.append((s_snap, cut, config.LABEL_INTRO, c))
+            if cut < e:
+                # Re-emit the tail so it can still be labelled ad / outro.
+                _emit_candidate(cut, e, c)
+            return
+        if e > duration - outro_window:
+            # An outro that's near the end should extend all the way to
+            # end-of-video (credits + post-roll). Snap end to duration.
+            e_snap = duration
+            cut = max(s, e_snap - outro_cap) if outro_cap else s
+            if s < cut:
+                # The body portion before the outro gets labelled ad.
+                relabelled.append((s, cut, config.LABEL_AD, c))
+            relabelled.append((cut, e_snap, config.LABEL_OUTRO, c))
+            return
+        relabelled.append((s, e, config.LABEL_AD, c))
+
     for s, e, lbl, c in merged:
         if lbl != "__candidate__":
             relabelled.append((s, e, lbl, c))
             continue
-        if s < intro_window:
-            relabelled.append((s, e, config.LABEL_INTRO, c))
-        elif e > duration - outro_window:
-            relabelled.append((s, e, config.LABEL_OUTRO, c))
-        else:
-            relabelled.append((s, e, config.LABEL_AD, c))
+        _emit_candidate(s, e, c)
 
     # Now fill gaps between non-content segments with core_content
     result: list[Segment] = []

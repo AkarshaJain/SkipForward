@@ -113,9 +113,10 @@ def run_video(item: VideoItem | str,
                  int(np.sum(speech.ad_keyword_score > 0)))
     else:
         log.info("[4/6] skipping speech transcription (use_whisper=False)")
+        n_steps = max(int(np.ceil(num_seconds(meta) * config.SAMPLE_FPS)), 1)
         speech = SpeechFeatures(
-            ad_keyword_score=np.zeros(num_seconds(meta)),
-            speech_density=np.zeros(num_seconds(meta)),
+            ad_keyword_score=np.zeros(n_steps),
+            speech_density=np.zeros(n_steps),
             available=False,
         )
 

@@ -66,8 +66,18 @@ def detect_splice_pair_ads(
     if len(splice_times) < 2:
         return []
 
-    splice_times = sorted(set(int(round(t)) for t in splice_times))
+    # ``splice_times`` come in seconds. The feature matrix is at
+    # ``config.SAMPLE_FPS`` Hz, so every (start, end) pair we score is
+    # also kept in grid-step indices. We hold the seconds version
+    # alongside in ``splice_times_sec`` for the public output.
+    splice_times_sec = sorted({float(t) for t in splice_times})
+    splice_times = sorted({int(round(t * config.SAMPLE_FPS))
+                            for t in splice_times_sec})
     n = feature_matrix.shape[0]
+    # convert second-valued bounds to step counts.
+    pair_min = max(int(round(PAIR_MIN * config.SAMPLE_FPS)), 1)
+    pair_max = max(int(round(PAIR_MAX * config.SAMPLE_FPS)), 1)
+    margin_steps = max(int(round(margin_sec * config.SAMPLE_FPS)), 1)
 
     F = feature_matrix.copy()
     mu = F.mean(axis=0, keepdims=True)
@@ -84,10 +94,10 @@ def detect_splice_pair_ads(
     keyword = ad_keyword
 
     def _candidate_score(a_idx: int, b_idx: int) -> float | None:
-        if b_idx - a_idx < PAIR_MIN or b_idx - a_idx > PAIR_MAX:
+        if b_idx - a_idx < pair_min or b_idx - a_idx > pair_max:
             return None
-        left_a = max(0, a_idx - margin_sec)
-        right_b = min(n, b_idx + margin_sec)
+        left_a = max(0, a_idx - margin_steps)
+        right_b = min(n, b_idx + margin_steps)
         inside = Fz[a_idx:b_idx]
         left_ctx = Fz[left_a:a_idx]
         right_ctx = Fz[b_idx:right_b]
@@ -116,13 +126,15 @@ def detect_splice_pair_ads(
         return local_distinct + 0.4 * ad_bonus
 
     # Consider all (i, j) pairs but score with the strict criterion above.
+    # All comparisons are in grid steps; we'll convert back to seconds at
+    # the very end.
     candidates: list[tuple[float, tuple[int, int]]] = []
     for i, a in enumerate(splice_times):
         for j in range(i + 1, len(splice_times)):
             b = splice_times[j]
-            if b - a > PAIR_MAX:
+            if b - a > pair_max:
                 break
-            if b - a < PAIR_MIN:
+            if b - a < pair_min:
                 continue
             s = _candidate_score(int(a), int(b))
             if s is not None:
@@ -132,14 +144,19 @@ def detect_splice_pair_ads(
     candidates.sort(reverse=True)
     accepted: list[tuple[int, int, float]] = []
     SCORE_FLOOR = 2.0  # ~2 z-units of combined distinctiveness
+    # Reject overlapping selections within 5 *seconds* of each other
+    # (converted to step count).
+    overlap_steps = max(int(round(5.0 * config.SAMPLE_FPS)), 1)
     for score, (a, b) in candidates:
         if score < SCORE_FLOOR:
             break
-        # reject candidates that touch or overlap an already-accepted region
-        too_close = any(not (b + 5 <= ax or a >= bx + 5) for ax, bx, _ in accepted)
+        too_close = any(not (b + overlap_steps <= ax or a >= bx + overlap_steps)
+                         for ax, bx, _ in accepted)
         if too_close:
             continue
         conf = float(np.clip(1.0 / (1.0 + np.exp(-(score - 2.5))), 0.05, 0.99))
         accepted.append((a, b, conf))
 
-    return [(float(a), float(b), c) for (a, b, c) in accepted]
+    # Convert step indices back to seconds for the public output.
+    return [(a / config.SAMPLE_FPS, b / config.SAMPLE_FPS, c)
+            for (a, b, c) in accepted]

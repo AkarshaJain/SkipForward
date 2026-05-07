@@ -1,9 +1,10 @@
-"""Multimodal fusion → per-second feature matrix.
+"""Multimodal fusion → per-step feature matrix.
 
-All modality outputs are aligned to a common 1-Hz timeline of length ``N``
-(one row per second of video). We z-score each channel against the *video's
-own* distribution so the segmenter is robust to absolute differences across
-videos (a quiet podcast still has 'loud ads' relative to itself).
+All modality outputs are aligned to a common ``config.SAMPLE_FPS``-Hz
+timeline of length ``N`` (one row per ``1/SAMPLE_FPS`` seconds of video).
+We z-score each channel against the *video's own* distribution so the
+segmenter is robust to absolute differences across videos (a quiet
+podcast still has 'loud ads' relative to itself).
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ from typing import Mapping
 
 import numpy as np
 
+from . import config
 from .features_audio import AudioFeatures
 from .features_visual import VisualFeatures, shot_rate_per_second
 from .features_speech import SpeechFeatures
@@ -65,11 +67,13 @@ def _zscore(arr: np.ndarray) -> np.ndarray:
 
 
 def _local_outlierness(z_features: np.ndarray, window: int = 120) -> np.ndarray:
-    """How anomalous is each second's feature vector vs. its local context?
+    """How anomalous is each step's feature vector vs. its local context?
 
-    Computed as the L2 distance between the row at ``t`` and the mean row
-    of an outer ring ``[t-W, t-W/2] ∪ [t+W/2, t+W]`` (skipping the inner
-    half so a wide ad doesn't suppress its own outlierness).
+    ``window`` is given in *grid steps* (already scaled by SAMPLE_FPS by
+    the caller). Computed as the L2 distance between the row at ``t``
+    and the mean row of an outer ring ``[t-W, t-W/2] ∪ [t+W/2, t+W]``
+    (skipping the inner half so a wide ad doesn't suppress its own
+    outlierness).
     """
     n = z_features.shape[0]
     if n == 0:
@@ -99,8 +103,8 @@ def fuse(
     audio: AudioFeatures,
     speech: SpeechFeatures,
 ) -> FusedFeatures:
-    """Build the (N, C) feature matrix at 1 Hz."""
-    n = max(int(np.ceil(duration_sec)), 1)
+    """Build the (N, C) feature matrix at ``config.SAMPLE_FPS`` Hz."""
+    n = max(int(np.ceil(duration_sec * config.SAMPLE_FPS)), 1)
 
     shot_rate = shot_rate_per_second(visual.shot_times, duration_sec)
 
@@ -132,13 +136,18 @@ def fuse(
             "saturation", "motion", "edge_density",
             "audio_rms", "music_likeness", "speech_density",
         )])
-    raw["local_outlierness"] = _local_outlierness(pre_matrix, window=120)
+    # 120 *seconds* of context, scaled to grid steps.
+    raw["local_outlierness"] = _local_outlierness(
+        pre_matrix, window=config.sec_to_width(120))
 
     matrix = np.column_stack([raw[c] for c in CHANNELS])
     z = np.column_stack([_zscore(raw[c]) for c in CHANNELS])
 
+    # times is in seconds (each row = step / SAMPLE_FPS).
+    times = np.arange(n, dtype=np.float64) / config.SAMPLE_FPS
+
     return FusedFeatures(
-        times=np.arange(n, dtype=np.float64),
+        times=times,
         matrix=matrix,
         z=z,
         raw=dict(raw),
