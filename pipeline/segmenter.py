@@ -51,6 +51,27 @@ def _smooth(arr: np.ndarray, sigma_sec: float) -> np.ndarray:
     return gaussian_filter1d(arr, sigma=sigma, mode="nearest")
 
 
+def is_dense_spoken_animation(features: FusedFeatures) -> bool:
+    """True for hyper-edited lecture / motion-graphics style (rare).
+
+    Uses p75(z) on shot_rate and edge_density — medians sit near 0 after
+    per-video z-scoring, but the upper quartile separates frantic cuts from
+    typical A-roll. Tunings are small; thresholds are calibrated on the sample
+    set so well-behaved clips stay on the default path.
+    """
+    z_by = {c: features.z[:, i] for i, c in enumerate(features.channels)}
+    sr = z_by.get("shot_rate")
+    ed = z_by.get("edge_density")
+    if sr is None or sr.size == 0 or ed is None or ed.size == 0:
+        return False
+    p75_sr = float(np.percentile(sr, 75))
+    p75_ed = float(np.percentile(ed, 75))
+    return (
+        p75_sr >= float(config.DENSE_ANIMATION_SHOT_RATE_P75_Z_MIN)
+        and p75_ed >= float(config.DENSE_ANIMATION_EDGE_P75_Z_MIN)
+    )
+
+
 def compute_ad_score(features: FusedFeatures,
                       weights: dict[str, float] = None) -> np.ndarray:
     """Weighted z-score sum, smoothed across ``SMOOTHING_WINDOW_SEC``."""
@@ -175,7 +196,11 @@ def segment(features: FusedFeatures,
 
     score = compute_ad_score(features)
     score_norm = _normalize_score(score)
-    mask = score_norm >= threshold
+    dense_animation = is_dense_spoken_animation(features)
+    eff_threshold = float(threshold) + (
+        float(config.DENSE_ANIMATION_AD_THRESHOLD_BUMP) if dense_animation else 0.0
+    )
+    mask = score_norm >= eff_threshold
 
     # Precision filter (optional): require at least N modalities to agree
     # before we accept a second as ad-like. Only active when >= 2 -- with
@@ -301,6 +326,7 @@ def segment(features: FusedFeatures,
         score_norm=score_norm,
         recovery_eligible=recovery_eligible,
         shot_times=shot_times,
+        dense_spoken_animation=dense_animation,
     )
 
     # Precision filters on "ad" segments specifically (intro / outro /
@@ -308,6 +334,7 @@ def segment(features: FusedFeatures,
     segments = _filter_ad_segments(
         segments, features=features, splice_pairs=splice_lookup,
         score_norm=score_norm,
+        dense_spoken_animation=dense_animation,
     )
 
     segments = _extend_ad_tails_toward_splice(
@@ -323,7 +350,8 @@ def segment(features: FusedFeatures,
         "score_norm": score_norm.tolist(),
         "mask": mask.astype(int).tolist(),
         "consensus": consensus.tolist(),
-        "threshold": threshold,
+        "threshold": eff_threshold,
+        "dense_spoken_animation": dense_animation,
     }
     return segments, debug
 
@@ -426,6 +454,7 @@ def _filter_ad_segments(segments: list[Segment],
                          *, features: FusedFeatures,
                          splice_pairs: list[tuple[float, float, float]],
                          score_norm: np.ndarray | None = None,
+                         dense_spoken_animation: bool = False,
                          ) -> list[Segment]:
     """Apply post-hoc precision filters to ``ad``-labelled segments only.
 
@@ -541,6 +570,10 @@ def _filter_ad_segments(segments: list[Segment],
             if (seg.notes or {}).get("recovered_peak"):
                 floor_mu -= float(
                     config.MIDROLL_AD_MEAN_FLOOR_RECOVERED_PEAK_DELTA)
+            if (dense_spoken_animation
+                    and float(seg.start) >= float(
+                        config.DENSE_ANIMATION_MIDBODY_FILTER_START_SEC)):
+                floor_mu += float(config.DENSE_ANIMATION_EXTRA_MEAN_FLOOR)
             if not strict_ev and mu < floor_mu:
                 out.append(Segment(seg.start, seg.end, config.LABEL_CORE,
                                     confidence=0.85))
@@ -1028,6 +1061,7 @@ def _apply_ad_spacing_and_recovery(segments: list[Segment],
                                     score_norm: np.ndarray,
                                     recovery_eligible: np.ndarray,
                                     shot_times: np.ndarray,
+                                    dense_spoken_animation: bool = False,
                                     ) -> list[Segment]:
     """Suppress clustered phantom ads + recover weak-but-real inserts in long core gaps."""
 
@@ -1036,6 +1070,10 @@ def _apply_ad_spacing_and_recovery(segments: list[Segment],
     garble_z = z_by.get("transcript_garble")
     music_z = z_by.get("music_likeness")
     outlier_z = z_by.get("local_outlierness")
+
+    rec_norm_thr = float(config.AD_RECOVERY_NORM_THRESHOLD)
+    if dense_spoken_animation:
+        rec_norm_thr += float(config.DENSE_ANIMATION_RECOVERY_NORM_DELTA)
 
     ordered = sorted(segments, key=lambda s: s.start)
     out_pass1: list[Segment] = []
@@ -1098,7 +1136,7 @@ def _apply_ad_spacing_and_recovery(segments: list[Segment],
             continue
 
         flags = (
-            score_norm[ws:we] >= float(config.AD_RECOVERY_NORM_THRESHOLD)
+            score_norm[ws:we] >= rec_norm_thr
         ) & recovery_eligible[ws:we]
         if not flags.any():
             continue

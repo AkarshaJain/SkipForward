@@ -15,7 +15,7 @@
       "end": 60.0,
       "duration": 32.97,
       "label": "intro",
-      "confidence": 0.614
+      "confidence": 0.571
     },
     {
       "start": 60.0,
@@ -26,24 +26,24 @@
     },
     {
       "start": 151.37,
-      "end": 192.616,
-      "duration": 41.246,
+      "end": 221.849,
+      "duration": 70.479,
       "label": "ad",
-      "confidence": 0.829
+      "confidence": 0.707
     },
     {
-      "start": 192.616,
-      "end": 687.571,
-      "duration": 494.955,
+      "start": 221.849,
+      "end": 677.76,
+      "duration": 455.912,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 687.571,
+      "start": 677.76,
       "end": 706.393,
-      "duration": 18.821,
+      "duration": 28.632,
       "label": "ad",
-      "confidence": 0.733
+      "confidence": 0.721
     },
     {
       "start": 706.393,
@@ -54,15 +54,15 @@
     },
     {
       "start": 1061.391,
-      "end": 1086.018,
-      "duration": 24.628,
+      "end": 1083.616,
+      "duration": 22.225,
       "label": "ad",
-      "confidence": 0.868
+      "confidence": 0.831
     },
     {
-      "start": 1086.018,
+      "start": 1083.616,
       "end": 1419.673,
-      "duration": 333.654,
+      "duration": 336.057,
       "label": "core_content",
       "confidence": 0.85
     }
@@ -76,19 +76,19 @@
     },
     {
       "start": 151.37,
-      "end": 192.616,
+      "end": 221.849,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
-      "start": 687.571,
+      "start": 677.76,
       "end": 706.393,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
       "start": 1061.391,
-      "end": 1086.018,
+      "end": 1083.616,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     }
@@ -100,9 +100,9 @@
       "intro": 1,
       "ad": 3
     },
-    "core_content_seconds": 1302.008,
-    "non_content_seconds": 117.665,
-    "non_content_ratio": 0.0829
+    "core_content_seconds": 1265.367,
+    "non_content_seconds": 154.306,
+    "non_content_ratio": 0.1087
   },
   "timeline_map": [
     {
@@ -127,18 +127,18 @@
       "label": "ad",
       "color": "#c62828",
       "start": 151.37,
-      "end": 192.616
+      "end": 221.849
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 192.616,
-      "end": 687.571
+      "start": 221.849,
+      "end": 677.76
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 687.571,
+      "start": 677.76,
       "end": 706.393
     },
     {
@@ -151,35 +151,41 @@
       "label": "ad",
       "color": "#c62828",
       "start": 1061.391,
-      "end": 1086.018
+      "end": 1083.616
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 1086.018,
+      "start": 1083.616,
       "end": 1419.673
     }
   ],
   "extra": {
     "shot_count": 282,
+    "dense_spoken_animation": false,
+    "ad_score_threshold_used": 0.6,
     "splice_boundaries": [
       27.03,
       76.886,
       79.289,
       82.292,
+      437.291,
       438.692,
       444.699,
       447.702,
       448.503,
       483.943,
       487.147,
-      490.55,
       500.762,
+      655.736,
+      694.379,
+      706.393,
       762.856,
       767.261,
       769.664,
       771.866,
       941.456,
+      949.665,
       1019.944,
       1023.548,
       1083.616,
@@ -188,9 +194,9 @@
     ],
     "splice_pair_ads": [
       {
-        "start": 487.0,
-        "end": 501.0,
-        "confidence": 0.99
+        "start": 950.0,
+        "end": 1020.0,
+        "confidence": 0.953
       },
       {
         "start": 27.0,
@@ -198,14 +204,29 @@
         "confidence": 0.951
       },
       {
-        "start": 941.0,
-        "end": 1024.0,
-        "confidence": 0.794
+        "start": 694.0,
+        "end": 706.0,
+        "confidence": 0.84
+      },
+      {
+        "start": 487.0,
+        "end": 501.0,
+        "confidence": 0.831
+      },
+      {
+        "start": 437.0,
+        "end": 449.0,
+        "confidence": 0.678
       },
       {
         "start": 1317.0,
         "end": 1354.0,
         "confidence": 0.651
+      },
+      {
+        "start": 772.0,
+        "end": 941.0,
+        "confidence": 0.537
       }
     ],
     "silence_regions": [

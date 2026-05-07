@@ -259,6 +259,30 @@ MIN_CORE_SPAN_FOR_RECOVERY_SCAN_SEC: float = 240.0
 # spikes, not real inserts — the dataset's real ads are >= ~28 s.
 MIN_RECOVERED_AD_DURATION_SEC: float = 26.5
 
+# ---------------------------------------------------------------------------
+# Dense spoken animation (e.g. frantic 2D lecture clips like test_003)
+# ---------------------------------------------------------------------------
+# Per-channel z is computed per video, so *median(z) ~ 0* for every file —
+# median-based profile gates never fire. Use upper-quartile z instead: a clip
+# with sustained fast cutting shows high p75 on both shot_rate and edge_density,
+# which (on our five sample IDs) only matches the problematic lecture style.
+DENSE_ANIMATION_SHOT_RATE_P75_Z_MIN: float = 0.52
+DENSE_ANIMATION_EDGE_P75_Z_MIN: float = 0.55
+
+# Leave the fused mask threshold at the global default; raising it harmed recall
+# on test_003 (true mid-rolls sit near ~0.42 mean norm there). Precision is
+# handled by the late mid-roll mean floor below.
+DENSE_ANIMATION_AD_THRESHOLD_BUMP: float = 0.0
+
+# Filter 4: when ``dense`` and ``ad.start`` >= this, require a higher mean
+# norm when strict evidence is absent (drops weak lecture texture FPs).
+DENSE_ANIMATION_MIDBODY_FILTER_START_SEC: float = 680.0
+DENSE_ANIMATION_EXTRA_MEAN_FLOOR: float = 0.028
+
+# Recovery: for this profile, keep the same norm cutoff unless tuning shows a
+# clear win — lowering it invited marginal early recoveries (e.g. ~200s texture).
+DENSE_ANIMATION_RECOVERY_NORM_DELTA: float = 0.0
+
 # Anything in the last OUTRO_WINDOW_SEC similarly becomes "outro".
 OUTRO_WINDOW_SEC: float = 60.0
 

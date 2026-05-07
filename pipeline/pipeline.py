@@ -160,6 +160,9 @@ def run_video(item: VideoItem | str,
     log.info("[6/6] writing outputs...")
     extra = {
         "shot_count": int(visual.shot_times.size),
+        "dense_spoken_animation": bool(debug.get("dense_spoken_animation")),
+        "ad_score_threshold_used": float(
+            debug.get("threshold", config.AD_SCORE_THRESHOLD)),
         "splice_boundaries": [round(t, 3) for t in splice_times],
         "splice_pair_ads": [
             {"start": round(a, 3), "end": round(b, 3),

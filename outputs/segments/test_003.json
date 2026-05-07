@@ -5,165 +5,199 @@
   "segments": [
     {
       "start": 0.0,
-      "end": 400.785,
-      "duration": 400.785,
+      "end": 199.56,
+      "duration": 199.56,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 400.785,
-      "end": 493.802,
-      "duration": 93.017,
+      "start": 199.56,
+      "end": 228.901,
+      "duration": 29.341,
+      "label": "ad",
+      "confidence": 0.71,
+      "notes": {
+        "recovered_peak": true
+      }
+    },
+    {
+      "start": 228.901,
+      "end": 408.484,
+      "duration": 179.583,
+      "label": "core_content",
+      "confidence": 0.85
+    },
+    {
+      "start": 408.484,
+      "end": 485.062,
+      "duration": 76.578,
       "label": "ad",
       "confidence": 0.788
     },
     {
-      "start": 493.802,
+      "start": 485.062,
       "end": 528.761,
-      "duration": 34.959,
+      "duration": 43.699,
       "label": "core_content",
       "confidence": 0.85
     },
     {
       "start": 528.761,
-      "end": 615.536,
-      "duration": 86.774,
+      "end": 559.143,
+      "duration": 30.381,
       "label": "ad",
-      "confidence": 0.803,
-      "notes": {
-        "merged_adjacent_core_gap_sec": 33.919
-      }
+      "confidence": 0.902
     },
     {
-      "start": 615.536,
-      "end": 1041.916,
-      "duration": 426.38,
+      "start": 559.143,
+      "end": 1060.644,
+      "duration": 501.501,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 1041.916,
+      "start": 1060.644,
       "end": 1097.269,
-      "duration": 55.352,
+      "duration": 36.624,
       "label": "ad",
-      "confidence": 0.9
+      "confidence": 0.847
     },
     {
       "start": 1097.269,
-      "end": 1183.419,
-      "duration": 86.15,
+      "end": 1211.511,
+      "duration": 114.242,
       "label": "core_content",
       "confidence": 0.85
     },
     {
-      "start": 1183.419,
-      "end": 1256.459,
-      "duration": 73.04,
+      "start": 1211.511,
+      "end": 1252.713,
+      "duration": 41.202,
       "label": "ad",
-      "confidence": 0.714
+      "confidence": 0.719
     },
     {
-      "start": 1256.459,
+      "start": 1252.713,
       "end": 1826.506,
-      "duration": 570.047,
+      "duration": 573.793,
       "label": "core_content",
       "confidence": 0.85
     }
   ],
   "skip_recommendations": [
     {
-      "start": 400.785,
-      "end": 493.802,
+      "start": 199.56,
+      "end": 228.901,
+      "label": "ad",
+      "reason": "Detected as advertisement (visual + audio + speech cues)."
+    },
+    {
+      "start": 408.484,
+      "end": 485.062,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
       "start": 528.761,
-      "end": 615.536,
+      "end": 559.143,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
-      "start": 1041.916,
+      "start": 1060.644,
       "end": 1097.269,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     },
     {
-      "start": 1183.419,
-      "end": 1256.459,
+      "start": 1211.511,
+      "end": 1252.713,
       "label": "ad",
       "reason": "Detected as advertisement (visual + audio + speech cues)."
     }
   ],
   "summary": {
-    "total_segments": 9,
+    "total_segments": 11,
     "labels": {
-      "core_content": 5,
-      "ad": 4
+      "core_content": 6,
+      "ad": 5
     },
-    "core_content_seconds": 1518.322,
-    "non_content_seconds": 308.184,
-    "non_content_ratio": 0.1687
+    "core_content_seconds": 1612.379,
+    "non_content_seconds": 214.127,
+    "non_content_ratio": 0.1172
   },
   "timeline_map": [
     {
       "label": "core_content",
       "color": "#2e7d32",
       "start": 0.0,
-      "end": 400.785
+      "end": 199.56
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 400.785,
-      "end": 493.802
+      "start": 199.56,
+      "end": 228.901
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 493.802,
+      "start": 228.901,
+      "end": 408.484
+    },
+    {
+      "label": "ad",
+      "color": "#c62828",
+      "start": 408.484,
+      "end": 485.062
+    },
+    {
+      "label": "core_content",
+      "color": "#2e7d32",
+      "start": 485.062,
       "end": 528.761
     },
     {
       "label": "ad",
       "color": "#c62828",
       "start": 528.761,
-      "end": 615.536
+      "end": 559.143
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 615.536,
-      "end": 1041.916
+      "start": 559.143,
+      "end": 1060.644
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 1041.916,
+      "start": 1060.644,
       "end": 1097.269
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
       "start": 1097.269,
-      "end": 1183.419
+      "end": 1211.511
     },
     {
       "label": "ad",
       "color": "#c62828",
-      "start": 1183.419,
-      "end": 1256.459
+      "start": 1211.511,
+      "end": 1252.713
     },
     {
       "label": "core_content",
       "color": "#2e7d32",
-      "start": 1256.459,
+      "start": 1252.713,
       "end": 1826.506
     }
   ],
   "extra": {
     "shot_count": 539,
+    "dense_spoken_animation": true,
+    "ad_score_threshold_used": 0.6,
     "splice_boundaries": [
       408.484,
       409.941,
@@ -172,6 +206,7 @@
       420.554,
       421.594,
       422.635,
+      455.513,
       458.635,
       465.293,
       469.871,
@@ -193,15 +228,12 @@
       826.333,
       830.079,
       832.992,
-      844.229,
       845.685,
       924.968,
       985.731,
       1008.205,
       1009.246,
       1058.563,
-      1268.736,
-      1384.227,
       1417.73,
       1420.019,
       1423.973,
@@ -210,9 +242,7 @@
       1434.794,
       1474.331,
       1475.996,
-      1478.493,
-      1670.77,
-      1671.394
+      1661.406
     ],
     "splice_pair_ads": [
       {
@@ -223,37 +253,37 @@
       {
         "start": 1420.0,
         "end": 1433.0,
-        "confidence": 0.899
+        "confidence": 0.9
       },
       {
         "start": 410.0,
         "end": 422.0,
-        "confidence": 0.847
+        "confidence": 0.843
       },
       {
         "start": 567.0,
         "end": 582.0,
-        "confidence": 0.785
+        "confidence": 0.815
       },
       {
         "start": 768.0,
         "end": 790.0,
-        "confidence": 0.779
+        "confidence": 0.766
       },
       {
-        "start": 1059.0,
-        "end": 1269.0,
-        "confidence": 0.664
-      },
-      {
-        "start": 1478.0,
-        "end": 1671.0,
-        "confidence": 0.622
+        "start": 925.0,
+        "end": 1059.0,
+        "confidence": 0.569
       },
       {
         "start": 833.0,
-        "end": 1009.0,
-        "confidence": 0.542
+        "end": 846.0,
+        "confidence": 0.556
+      },
+      {
+        "start": 1476.0,
+        "end": 1661.0,
+        "confidence": 0.47
       }
     ],
     "silence_regions": [

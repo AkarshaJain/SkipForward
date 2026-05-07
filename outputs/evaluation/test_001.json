@@ -2,20 +2,20 @@
   "duration_sec": 1458.425,
   "per_second": {
     "precision": 1.0,
-    "recall": 0.8626,
-    "f1": 0.9263,
-    "iou": 0.8626
+    "recall": 0.2857,
+    "f1": 0.4444,
+    "iou": 0.2857
   },
   "regions": {
-    "detection_rate": 1.0,
-    "mean_iou": 0.8459,
+    "detection_rate": 0.6667,
+    "mean_iou": 0.5538,
     "matches": [
       {
         "gt_start": 106.159,
         "gt_end": 224.395,
-        "best_pred_start": 106.61,
-        "best_pred_end": 210.207,
-        "iou": 0.876
+        "best_pred_start": 630.62,
+        "best_pred_end": 658.402,
+        "iou": 0.0
       },
       {
         "gt_start": 628.163,
@@ -33,5 +33,5 @@
       }
     ]
   },
-  "summary": "GT ads: 3 | Predicted non-content regions: 3 | Detected (IoU>0.30): 3/3 (100%) | Mean region IoU: 0.85 | Per-second F1: 0.93"
+  "summary": "GT ads: 3 | Predicted non-content regions: 2 | Detected (IoU>0.30): 2/3 (67%) | Mean region IoU: 0.55 | Per-second F1: 0.44"
 }

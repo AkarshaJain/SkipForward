@@ -5,26 +5,8 @@
   "segments": [
     {
       "start": 0.0,
-      "end": 106.61,
-      "duration": 106.61,
-      "label": "core_content",
-      "confidence": 0.85
-    },
-    {
-      "start": 106.61,
-      "end": 210.207,
-      "duration": 103.597,
-      "label": "ad",
-      "confidence": 0.71,
-      "notes": {
-        "recovered_peak": true,
-        "tail_extended_to_splice": true
-      }
-    },
-    {
-      "start": 210.207,
       "end": 630.62,
-      "duration": 420.413,
+      "duration": 630.62,
       "label": "core_content",
       "confidence": 0.85
     },
@@ -33,7 +15,7 @@
       "end": 658.402,
       "duration": 27.782,
       "label": "ad",
-      "confidence": 0.918
+      "confidence": 0.919
     },
     {
       "start": 658.402,
@@ -47,7 +29,7 @@
       "end": 1115.635,
       "duration": 22.594,
       "label": "ad",
-      "confidence": 0.951
+      "confidence": 0.95
     },
     {
       "start": 1115.635,
@@ -58,12 +40,6 @@
     }
   ],
   "skip_recommendations": [
-    {
-      "start": 106.61,
-      "end": 210.207,
-      "label": "ad",
-      "reason": "Detected as advertisement (visual + audio + speech cues)."
-    },
     {
       "start": 630.62,
       "end": 658.402,
@@ -78,32 +54,20 @@
     }
   ],
   "summary": {
-    "total_segments": 7,
+    "total_segments": 5,
     "labels": {
-      "core_content": 4,
-      "ad": 3
+      "core_content": 3,
+      "ad": 2
     },
-    "core_content_seconds": 1304.452,
-    "non_content_seconds": 153.973,
-    "non_content_ratio": 0.1056
+    "core_content_seconds": 1408.049,
+    "non_content_seconds": 50.376,
+    "non_content_ratio": 0.0345
   },
   "timeline_map": [
     {
       "label": "core_content",
       "color": "#2e7d32",
       "start": 0.0,
-      "end": 106.61
-    },
-    {
-      "label": "ad",
-      "color": "#c62828",
-      "start": 106.61,
-      "end": 210.207
-    },
-    {
-      "label": "core_content",
-      "color": "#2e7d32",
-      "start": 210.207,
       "end": 630.62
     },
     {
@@ -133,6 +97,8 @@
   ],
   "extra": {
     "shot_count": 113,
+    "dense_spoken_animation": false,
+    "ad_score_threshold_used": 0.6,
     "splice_boundaries": [
       4.017,
       210.207,
@@ -153,7 +119,7 @@
       {
         "start": 4.0,
         "end": 210.0,
-        "confidence": 0.972
+        "confidence": 0.974
       }
     ],
     "silence_regions": [

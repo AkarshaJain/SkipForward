@@ -1,37 +1,37 @@
 {
   "duration_sec": 1419.673,
   "per_second": {
-    "precision": 0.7025,
-    "recall": 0.7798,
-    "f1": 0.7391,
-    "iou": 0.5862
+    "precision": 0.6306,
+    "recall": 0.9083,
+    "f1": 0.7444,
+    "iou": 0.5928
   },
   "regions": {
     "detection_rate": 1.0,
-    "mean_iou": 0.7462,
+    "mean_iou": 0.7743,
     "matches": [
       {
         "gt_start": 151.061,
         "gt_end": 196.131,
         "best_pred_start": 151.37,
-        "best_pred_end": 192.616,
-        "iou": 0.915
+        "best_pred_end": 221.849,
+        "iou": 0.632
       },
       {
         "gt_start": 676.914,
         "gt_end": 707.007,
-        "best_pred_start": 687.571,
+        "best_pred_start": 677.76,
         "best_pred_end": 706.393,
-        "iou": 0.625
+        "iou": 0.951
       },
       {
         "gt_start": 1053.804,
         "gt_end": 1083.874,
         "best_pred_start": 1061.391,
-        "best_pred_end": 1086.018,
-        "iou": 0.698
+        "best_pred_end": 1083.616,
+        "iou": 0.739
       }
     ]
   },
-  "summary": "GT ads: 3 | Predicted non-content regions: 4 | Detected (IoU>0.30): 3/3 (100%) | Mean region IoU: 0.75 | Per-second F1: 0.74"
+  "summary": "GT ads: 3 | Predicted non-content regions: 4 | Detected (IoU>0.30): 3/3 (100%) | Mean region IoU: 0.77 | Per-second F1: 0.74"
 }

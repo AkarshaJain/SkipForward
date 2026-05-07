@@ -43,7 +43,7 @@
       "end": 1692.0,
       "duration": 57.0,
       "label": "ad",
-      "confidence": 0.844
+      "confidence": 0.846
     },
     {
       "start": 1692.0,
@@ -129,6 +129,8 @@
   ],
   "extra": {
     "shot_count": 126,
+    "dense_spoken_animation": false,
+    "ad_score_threshold_used": 0.6,
     "splice_boundaries": [
       7.107,
       7.615,
