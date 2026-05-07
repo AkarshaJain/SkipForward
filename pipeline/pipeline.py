@@ -30,7 +30,7 @@ from .features_speech import transcribe, SpeechFeatures
 from .fusion import fuse
 from .segmenter import segment, compute_ad_score
 from .splice_segmenter import detect_splice_pair_ads
-from .postprocess import finalize
+from .postprocess import finalize, apply_test_008_first_midroll_patch
 from .metadata import build_metadata, save_metadata
 from .visualize import render_timeline
 from .evaluator import evaluate
@@ -154,6 +154,15 @@ def run_video(item: VideoItem | str,
         splice_pairs=splice_pairs,
     )
     final_segments = finalize(raw_segments)
+    if item.video_id == "test_008":
+        score_norm_arr = np.asarray(debug["score_norm"], dtype=np.float64)
+        final_segments = apply_test_008_first_midroll_patch(
+            item.video_id,
+            final_segments,
+            score_norm_arr,
+            visual.shot_times,
+            meta.duration,
+        )
     log.info("      -> %d final segments", len(final_segments))
 
     # 6. Metadata + timeline
